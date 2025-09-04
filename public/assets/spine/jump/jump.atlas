@@ -1,0 +1,55 @@
+jump.png
+	size: 364, 100
+	filter: Linear, Linear
+	pma: true
+content
+	bounds: 101, 2, 96, 97
+	rotate: 90
+content-1
+	bounds: 2, 2, 96, 97
+	rotate: 90
+role01_1
+	bounds: 200, 36, 62, 56
+	offsets: 1, 2, 65, 59
+	rotate: 90
+role01_2
+	bounds: 342, 30, 19, 21
+	offsets: 1, 0, 20, 23
+role01_3
+	bounds: 337, 77, 21, 20
+	offsets: 3, 2, 26, 23
+	rotate: 90
+role01_4
+	bounds: 200, 6, 26, 28
+	offsets: 1, 0, 28, 29
+role01_5
+	bounds: 256, 6, 22, 28
+	offsets: 1, 1, 23, 29
+role01_6
+	bounds: 304, 12, 19, 22
+	offsets: 1, 2, 21, 26
+role01_7
+	bounds: 325, 28, 15, 22
+	offsets: 6, 3, 28, 29
+role02_1
+	bounds: 258, 36, 62, 56
+	offsets: 3, 2, 67, 61
+	rotate: 90
+role02_2
+	bounds: 335, 53, 21, 21
+	offsets: 6, 3, 30, 26
+role02_3
+	bounds: 325, 5, 20, 21
+	offsets: 4, 1, 28, 25
+role02_4
+	bounds: 228, 6, 26, 28
+	offsets: 1, 0, 27, 29
+role02_5
+	bounds: 280, 7, 22, 27
+	offsets: 1, 1, 23, 29
+role02_6
+	bounds: 316, 76, 19, 22
+	offsets: 1, 1, 21, 25
+role02_7
+	bounds: 316, 52, 17, 22
+	offsets: 7, 3, 31, 31
