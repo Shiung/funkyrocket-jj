@@ -24,8 +24,8 @@ export interface Character {
   spine: any
   position: { x: number; y: number }
   isVisible: boolean
-  textResult?: CreateTextResult // 文字物件（可選）
-  boneTracker?: BoneTracker // 骨骼追蹤器（可選）
+  textResults?: CreateTextResult[] // 文字物件陣列（可選）
+  boneTrackers?: BoneTracker[] // 骨骼追蹤器陣列（可選）
 }
 
 // 文字跟隨功能結果

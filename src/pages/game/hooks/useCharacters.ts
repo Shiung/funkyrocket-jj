@@ -159,7 +159,7 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
   }
 
   // 創建下車角色（使用 jump 動畫）
-  const createCharacterJump = async (type: CharacterType, id: string, followText: string = ''): Promise<Character | null> => {
+  const createCharacterJump = async (type: CharacterType, id: string, followText?: { name: string, odds: string }): Promise<Character | null> => {
     const app = getApp()
     const rocketSpine = getRocketSpine()
     if (!app) return null
@@ -193,7 +193,20 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
       app.stage.addChild(spine)
       
       // 為角色創建文字跟隨（如果需要）
-      const { textResult, boneTracker } = await createFollowText(app, spine, startX, startY, followText)
+      const textResults: any[] = []
+      const boneTrackers: any[] = []
+      
+      if (followText) {
+        // 創建 name 文字（帶背景）
+        const nameResult = await createFollowText(app, spine, startX, startY, followText.name, { x: 0, y: 60 }, true)
+        if (nameResult.textResult) textResults.push(nameResult.textResult)
+        if (nameResult.boneTracker) boneTrackers.push(nameResult.boneTracker)
+        
+        // 創建 odds 文字（純文字）
+        const oddsResult = await createFollowText(app, spine, startX, startY, followText.odds, { x: 0, y: 100 }, false)
+        if (oddsResult.textResult) textResults.push(oddsResult.textResult)
+        if (oddsResult.boneTracker) boneTrackers.push(oddsResult.boneTracker)
+      }
       
       const character: Character = {
         id,
@@ -201,8 +214,8 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
         spine,
         position: { x: startX, y: startY },
         isVisible: true,
-        boneTracker,
-        textResult
+        boneTrackers: boneTrackers.length > 0 ? boneTrackers : undefined,
+        textResults: textResults.length > 0 ? textResults : undefined
       }
       
       characters.set(id, character)
@@ -241,13 +254,21 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
         scaleY: scale
       })
 
-      // 啟動骨骼追蹤器並顯示文字
-      if (character.boneTracker && character.textResult) {
-        character.boneTracker.startTracking()
+      // 啟動所有骨骼追蹤器並顯示文字
+      if (character.boneTrackers && character.textResults) {
+        // 啟動所有骨骼追蹤器
+        character.boneTrackers.forEach(tracker => tracker.startTracking())
         
-        // 等一個 frame 讓骨骼追蹤器計算位置，然後顯示文字
+        // 等一個 frame 讓骨骼追蹤器計算位置，然後顯示所有文字
         requestAnimationFrame(() => {
-          character.textResult!.textObject.visible = true
+          character.textResults!.forEach(textResult => {
+            const textResultWithContainer = textResult as any
+            if (textResultWithContainer?.container) {
+              textResultWithContainer.container.visible = true
+            } else {
+              textResult.textObject.visible = true
+            }
+          })
         })
       }
       
@@ -262,14 +283,29 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
         if (progress < 1) requestAnimationFrame(animate)
         else {
           // 動畫完成，清理資源
-          if (character.boneTracker) {
-            character.boneTracker.stopTracking()
-            character.boneTracker.dispose()
+          if (character.boneTrackers) {
+            character.boneTrackers.forEach(tracker => {
+              tracker.stopTracking()
+              tracker.dispose()
+            })
           }
 
-          if (character.textResult && app && app.stage.getChildIndex(character.textResult.textObject) !== -1) {
-            app.stage.removeChild(character.textResult.textObject)
-            character.textResult.destroy()
+          if (character.textResults && app) {
+            character.textResults.forEach(textResult => {
+              const textResultWithContainer = textResult as any
+              if (textResultWithContainer?.container) {
+                // 如果有容器，移除容器
+                if (app.stage.getChildIndex(textResultWithContainer.container) !== -1) {
+                  app.stage.removeChild(textResultWithContainer.container)
+                }
+              } else {
+                // 如果沒有容器，移除原始文字物件
+                if (app.stage.getChildIndex(textResult.textObject) !== -1) {
+                  app.stage.removeChild(textResult.textObject)
+                }
+              }
+              textResult.destroy()
+            })
           }
 
           // 移除 Spine
@@ -310,14 +346,29 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
     if (!app) return
 
     for (const character of characters.values()) {
-      if (character.boneTracker) {
-        character.boneTracker.stopTracking()
-        character.boneTracker.dispose()
+      if (character.boneTrackers) {
+        character.boneTrackers.forEach(tracker => {
+          tracker.stopTracking()
+          tracker.dispose()
+        })
       }
 
-      if (character.textResult && app.stage.getChildIndex(character.textResult.textObject) !== -1) {
-        app.stage.removeChild(character.textResult.textObject)
-        character.textResult.destroy()
+      if (character.textResults) {
+        character.textResults.forEach(textResult => {
+          const textResultWithContainer = textResult as any
+          if (textResultWithContainer?.container) {
+            // 如果有容器，移除容器
+            if (app.stage.getChildIndex(textResultWithContainer.container) !== -1) {
+              app.stage.removeChild(textResultWithContainer.container)
+            }
+          } else {
+            // 如果沒有容器，移除原始文字物件
+            if (app.stage.getChildIndex(textResult.textObject) !== -1) {
+              app.stage.removeChild(textResult.textObject)
+            }
+          }
+          textResult.destroy()
+        })
       }
 
       if (app.stage.getChildIndex(character.spine) !== -1) {

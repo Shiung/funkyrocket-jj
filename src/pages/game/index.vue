@@ -323,7 +323,10 @@ const launchRocket = async (): Promise<void> => {
 // 玩家下車
 const playerDisembark = async (): Promise<void> => {
   logger.info('🎯 玩家下車按鈕被點擊')
-  const character = await createCharacterJump('player', `player-disembark-${Date.now()}`, '玩家下車囉')
+  const character = await createCharacterJump('player', `player-disembark-${Date.now()}`, { 
+    name: '玩家下車囉', 
+    odds: '9999999.99x' 
+  })
   if (!character) return
 
   removeCharacterFromBoard('player')
@@ -352,7 +355,10 @@ const streamerDisembark = async (): Promise<void> => {
     await new Promise(resolve => setTimeout(resolve, 1500))
   }
 
-  const character = await createCharacterJump('streamer', `streamer-disembark-${Date.now()}`, '主播下車囉')
+  const character = await createCharacterJump('streamer', `streamer-disembark-${Date.now()}`, { 
+    name: '主播下車囉', 
+    odds: '9999999.99x' 
+  })
   if (!character) return
 
   removeCharacterFromBoard('streamer')
