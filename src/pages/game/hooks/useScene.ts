@@ -71,12 +71,19 @@ export const useScene = () => {
     resetRocketFloat?: () => void,
   }): void => {
     const aspectRatio = DESIGN_WIDTH / DESIGN_HEIGHT // 原始比例
-    const viewportWidth = window.innerWidth
-    const viewportHeight = window.innerHeight
+    const parentDom = document.getElementById('app')
+    const viewportWidth = parentDom?.clientWidth || DESIGN_WIDTH
+    const viewportHeight = parentDom?.clientHeight || DESIGN_HEIGHT
     
     // 計算按高度和寬度縮放的尺寸
     const heightBasedWidth = Math.round(viewportHeight * aspectRatio)
     const widthBasedHeight = Math.round(viewportWidth / aspectRatio)
+
+    console.log('### heightBasedWidth', heightBasedWidth)
+    console.log('### widthBasedHeight', widthBasedHeight)
+
+    console.log('### viewportWidth', viewportWidth)
+    console.log('### viewportHeight', viewportHeight)
     
     // 選擇能完全顯示在螢幕內的尺寸
     if (heightBasedWidth <= viewportWidth) {
