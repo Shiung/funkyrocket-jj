@@ -47,6 +47,7 @@ export class AudioManager {
   private audioCache = new Map<string, HTMLAudioElement>()
   private activeBGMs = new Map<string, HTMLAudioElement>() // 支援多個 BGM 同時播放
   private logger?: (message: string) => void
+  private defaultVolume: number = 0.5
 
   constructor(assets: AudioAssets, logger?: (message: string) => void) {
     this.logger = logger
@@ -57,9 +58,46 @@ export class AudioManager {
     Object.entries(assets).forEach(([key, path]) => {
       const audio = new Audio(path)
       audio.preload = 'auto'
+      audio.setAttribute('muted', '')
+      audio.setAttribute('autoplay', '')
+      audio.setAttribute('playsinline', '')
+      // 先靜音播放一次，避免瀏覽器安全政策限制
+      audio.volume = 0
+      audio.muted = true
+      // audio.play().then(() => { audio.pause() }).catch(e => this.log(`音頻播放失敗: ${e}`))
+
       this.audioCache.set(key, audio)
       this.log(`音頻已預載入: ${key}`)
     })
+  }
+
+  // 因為瀏覽器安全限制，要使用者點擊過才能播放音效，那就第一次點擊就全部播一次
+  playAudioOnFirstClick() {
+    let hasInteracted = false
+
+    const checkPlayAudio = () => {
+      if (hasInteracted) return
+
+      const playPromiseList = Array.from(this.audioCache.values()).map(audio => audio.play())
+
+      if (playPromiseList.every(playPromise => playPromise)) {
+        playPromiseList.forEach(playPromise => {
+          playPromise.then(() => {
+            console.log('Audio unlocked and is now playing.')
+            hasInteracted = true
+            // 成功播放後，移除監聽器，避免重複觸發
+            document.body.removeEventListener('click', checkPlayAudio)
+            document.body.removeEventListener('touchstart', checkPlayAudio)
+        }).catch(e => {
+            console.warn(`BGM 播放失敗: ${e}`)
+          })
+        })
+      }
+    }
+    
+    // 監聽整個頁面的點擊事件
+    document.body.addEventListener('click', checkPlayAudio)
+    document.body.addEventListener('touchstart', checkPlayAudio) // 針對手機
   }
 
   playBGM(key: string, loop: boolean = true): void {
@@ -69,11 +107,14 @@ export class AudioManager {
     const audio = this.audioCache.get(key)
     if (audio) {
       // 創建新的音頻實例以支援同時播放多個 BGM
-      const bgmInstance = audio.cloneNode() as HTMLAudioElement
+      // const bgmInstance = audio.cloneNode() as HTMLAudioElement
+      const bgmInstance = audio
       bgmInstance.loop = loop
       bgmInstance.currentTime = 0
       // 確保新實例使用當前音量設定
-      bgmInstance.volume = audio.volume
+      bgmInstance.volume = this.defaultVolume
+      bgmInstance.muted = false
+      // 播放
       bgmInstance.play().catch(e => this.log(`BGM 播放失敗: ${e}`))
       
       // 儲存到活躍 BGM 列表
@@ -109,9 +150,12 @@ export class AudioManager {
     if (audio) {
       // 創建新的實例以支援重疊播放
       const soundInstance = audio.cloneNode() as HTMLAudioElement
+      // const soundInstance = audio
       soundInstance.currentTime = 0
       // 確保新實例使用當前音量設定
-      soundInstance.volume = audio.volume
+      soundInstance.volume = this.defaultVolume
+      soundInstance.muted = false
+      // 播放
       soundInstance.play().catch(e => this.log(`音效播放失敗: ${e}`))
       this.log(`🔊 音效播放: ${key}`)
     }
@@ -119,11 +163,13 @@ export class AudioManager {
 
   setVolume(volume: number): void {
     const normalizedVolume = Math.max(0, Math.min(1, volume))
+    // 儲存預設音量
+    this.defaultVolume = normalizedVolume
     
     // 設置預載入音頻的音量
-    this.audioCache.forEach(audio => {
-      audio.volume = normalizedVolume
-    })
+    // this.audioCache.forEach(audio => {
+    //   audio.volume = normalizedVolume
+    // })
     
     // 設置正在播放的 BGM 音量
     this.activeBGMs.forEach(bgm => {

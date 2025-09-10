@@ -277,7 +277,7 @@ const launchRocket = async (): Promise<void> => {
     
     playRocketAnimation('rocket_shake', false)
     
-    playSound('rocket_prelaunch')
+    playBGM('rocket_prelaunch', false)
     
     // 等待1秒
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -301,11 +301,6 @@ const launchRocket = async (): Promise<void> => {
       playBGM('bgm_fly', true)
     }
 
-    // 播放火箭飛行音效（如果BGM開關啟用）
-    if (bgmEnabled.value) {
-      playBGM('rocket_fly', true)
-    }
-    
     // 進入下車階段
     setState(GameState.DISEMBARKING)
     logger.info('✅ 火箭發射完成，進入下車階段')

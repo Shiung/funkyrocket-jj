@@ -34,6 +34,8 @@ export const useAudio = () => {
     const manager = new AudioManager(audioAssets.value, logger.createLogFunction())
     // 立即應用當前音量設定
     manager.setVolume(audioStore.normalizedVolume)
+    // 因為瀏覽器安全限制，要使用者點擊過才能播放音效，那就第一次點擊就全部播一次
+    manager.playAudioOnFirstClick()
     return manager
   }
 
