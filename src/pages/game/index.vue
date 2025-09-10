@@ -162,7 +162,7 @@ const initScene = async (): Promise<void> => {
     
     setState(GameState.IDLE)
     logger.info('✅ Funky Rocket 遊戲場景初始化完成')
-    
+
   } catch (error) {
     logger.error(`❌ 場景初始化失敗: ${error}`)
   }

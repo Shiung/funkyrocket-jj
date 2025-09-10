@@ -42,102 +42,122 @@ export interface SceneConfig {
   logger?: (message: string) => void
 }
 
-// 音頻管理器
+// Web Audio API 音頻管理器
 export class AudioManager {
-  private audioCache = new Map<string, HTMLAudioElement>()
-  private activeBGMs = new Map<string, HTMLAudioElement>() // 支援多個 BGM 同時播放
+  private audioContext!: AudioContext
+  private buffers = new Map<string, AudioBuffer>()
+  private activeBGMs = new Map<string, AudioBufferSourceNode>() // 支援多個 BGM 同時播放
+  private gainNode!: GainNode // 主音量控制
   private logger?: (message: string) => void
   private defaultVolume: number = 0.5
+  private isContextReady = false
 
   constructor(assets: AudioAssets, logger?: (message: string) => void) {
     this.logger = logger
+    this.initAudioContext()
     this.preloadAudio(assets)
   }
 
-  private preloadAudio(assets: AudioAssets): void {
-    Object.entries(assets).forEach(([key, path]) => {
-      const audio = new Audio(path)
-      audio.preload = 'auto'
-      audio.setAttribute('muted', '')
-      audio.setAttribute('autoplay', '')
-      audio.setAttribute('playsinline', '')
-      // 先靜音播放一次，避免瀏覽器安全政策限制
-      audio.volume = 0
-      audio.muted = true
-      // audio.play().then(() => { audio.pause() }).catch(e => this.log(`音頻播放失敗: ${e}`))
-
-      this.audioCache.set(key, audio)
-      this.log(`音頻已預載入: ${key}`)
-    })
+  private initAudioContext(): void {
+    try {
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      this.gainNode = this.audioContext.createGain()
+      this.gainNode.connect(this.audioContext.destination)
+      this.gainNode.gain.value = this.defaultVolume
+      this.log('🎵 Web Audio Context 已初始化')
+    } catch (error) {
+      this.log(`Web Audio Context 初始化失敗: ${error}`)
+    }
   }
 
-  // 因為瀏覽器安全限制，要使用者點擊過才能播放音效，那就第一次點擊就全部播一次
-  playAudioOnFirstClick() {
-    let hasInteracted = false
-
-    const checkPlayAudio = () => {
-      if (hasInteracted) return
-
-      const playPromiseList = Array.from(this.audioCache.values()).map(audio => audio.play())
-
-      if (playPromiseList.every(playPromise => playPromise)) {
-        playPromiseList.forEach(playPromise => {
-          playPromise.then(() => {
-            console.log('Audio unlocked and is now playing.')
-            hasInteracted = true
-            // 成功播放後，移除監聽器，避免重複觸發
-            document.body.removeEventListener('click', checkPlayAudio)
-            document.body.removeEventListener('touchstart', checkPlayAudio)
-        }).catch(e => {
-            console.warn(`BGM 播放失敗: ${e}`)
-          })
-        })
+  private async preloadAudio(assets: AudioAssets): Promise<void> {
+    const loadPromises = Object.entries(assets).map(async ([key, path]) => {
+      try {
+        const response = await fetch(path)
+        const arrayBuffer = await response.arrayBuffer()
+        const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer)
+        this.buffers.set(key, audioBuffer)
+        this.log(`🔊 音頻已解碼: ${key}`)
+      } catch (error) {
+        this.log(`音頻載入失敗 ${key}: ${error}`)
       }
+    })
+
+    await Promise.all(loadPromises)
+    this.log('✅ 所有音頻載入完成')
+  }
+
+  // 因為瀏覽器安全限制，要使用者點擊過才能播放音效
+  playAudioOnFirstClick() {
+
+    const unlockAudio = async () => {
+      if (this.isContextReady) return
+
+      this.log('🔓 開始解鎖 Web Audio Context...')
+
+      try {
+        this.isContextReady = true
+        this.log('✅ Web Audio Context 已解鎖')
+      } catch (error) {
+        this.log(`Web Audio Context 解鎖失敗: ${error}`)
+      }
+
+      // 移除監聽器
+      document.body.removeEventListener('click', unlockAudio)
+      document.body.removeEventListener('touchstart', unlockAudio)
     }
     
     // 監聽整個頁面的點擊事件
-    document.body.addEventListener('click', checkPlayAudio)
-    document.body.addEventListener('touchstart', checkPlayAudio) // 針對手機
+    document.body.addEventListener('click', unlockAudio)
+    document.body.addEventListener('touchstart', unlockAudio) // 針對手機
   }
 
   playBGM(key: string, loop: boolean = true): void {
+    if (!this.isContextReady) return this.log(`🔒 BGM 待播放: ${key} (等待用戶互動)`)
+
     // 如果這個 BGM 已經在播放，先停止
     this.stopBGM(key)
     
-    const audio = this.audioCache.get(key)
-    if (audio) {
-      // 創建新的音頻實例以支援同時播放多個 BGM
-      // const bgmInstance = audio.cloneNode() as HTMLAudioElement
-      const bgmInstance = audio
-      bgmInstance.loop = loop
-      bgmInstance.currentTime = 0
-      // 確保新實例使用當前音量設定
-      bgmInstance.volume = this.defaultVolume
-      bgmInstance.muted = false
-      // 播放
-      bgmInstance.play().catch(e => this.log(`BGM 播放失敗: ${e}`))
+    const buffer = this.buffers.get(key)
+    if (!buffer) return this.log(`BGM 未找到: ${key}`)
+
+    try {
+      // 創建新的音頻源
+      const source = this.audioContext.createBufferSource()
+      source.buffer = buffer
+      source.loop = loop
+      source.connect(this.gainNode)
+      source.start()
       
       // 儲存到活躍 BGM 列表
-      this.activeBGMs.set(key, bgmInstance)
+      this.activeBGMs.set(key, source)
       this.log(`🎵 BGM 播放: ${key} (目前播放 ${this.activeBGMs.size} 個 BGM)`)
+    } catch (error) {
+      this.log(`BGM 播放失敗: ${error}`)
     }
   }
 
   stopBGM(key?: string): void {
     if (key) {
       // 停止特定的 BGM
-      const bgm = this.activeBGMs.get(key)
-      if (bgm) {
-        bgm.pause()
-        bgm.currentTime = 0
-        this.activeBGMs.delete(key)
-        this.log(`🎵 BGM 已停止: ${key}`)
+      const source = this.activeBGMs.get(key)
+      if (!source) return
+
+      try {
+        source.stop()
+      } catch {
+        // BufferSource 可能已經停止，忽略錯誤
       }
+      this.activeBGMs.delete(key)
+      this.log(`🎵 BGM 已停止: ${key}`)
     } else {
       // 停止所有 BGM
-      this.activeBGMs.forEach((bgm, bgmKey) => {
-        bgm.pause()
-        bgm.currentTime = 0
+      this.activeBGMs.forEach((source, bgmKey) => {
+        try {
+          source.stop()
+        } catch {
+          // BufferSource 可能已經停止，忽略錯誤
+        }
         this.log(`🎵 BGM 已停止: ${bgmKey}`)
       })
       this.activeBGMs.clear()
@@ -146,18 +166,21 @@ export class AudioManager {
   }
 
   playSound(key: string): void {
-    const audio = this.audioCache.get(key)
-    if (audio) {
-      // 創建新的實例以支援重疊播放
-      const soundInstance = audio.cloneNode() as HTMLAudioElement
-      // const soundInstance = audio
-      soundInstance.currentTime = 0
-      // 確保新實例使用當前音量設定
-      soundInstance.volume = this.defaultVolume
-      soundInstance.muted = false
-      // 播放
-      soundInstance.play().catch(e => this.log(`音效播放失敗: ${e}`))
+    if (!this.isContextReady) return this.log(`🔒 音效已忽略: ${key} (音頻未解鎖)`)
+
+    const buffer = this.buffers.get(key)
+    if (!buffer) return this.log(`音效未找到: ${key}`)
+
+    try {
+      // 創建新的音頻源 - 超快速，支援完美重疊播放
+      const source = this.audioContext.createBufferSource()
+      source.buffer = buffer
+      source.connect(this.gainNode)
+      source.start() // 立即播放，零延遲！
+      
       this.log(`🔊 音效播放: ${key}`)
+    } catch (error) {
+      this.log(`音效播放失敗: ${error}`)
     }
   }
 
@@ -166,15 +189,11 @@ export class AudioManager {
     // 儲存預設音量
     this.defaultVolume = normalizedVolume
     
-    // 設置預載入音頻的音量
-    // this.audioCache.forEach(audio => {
-    //   audio.volume = normalizedVolume
-    // })
-    
-    // 設置正在播放的 BGM 音量
-    this.activeBGMs.forEach(bgm => {
-      bgm.volume = normalizedVolume
-    })
+    // 設置主音量節點 - 控制所有音頻
+    if (this.gainNode) {
+      this.gainNode.gain.value = normalizedVolume
+      this.log(`🔊 音量設置: ${Math.round(normalizedVolume * 100)}%`)
+    }
   }
 
   private log(message: string): void {
@@ -185,14 +204,17 @@ export class AudioManager {
     // 停止所有 BGM
     this.stopBGM()
     
-    // 清理預載入音頻
-    this.audioCache.forEach(audio => {
-      audio.pause()
-      audio.src = ''
-    })
-    this.audioCache.clear()
+    // 清理音頻緩衝區
+    this.buffers.clear()
     
-    this.log('🗑️ 音頻管理器已清理')
+    // 關閉 AudioContext
+    if (this.audioContext && this.audioContext.state !== 'closed') {
+      this.audioContext.close().catch(error => {
+        this.log(`AudioContext 關閉失敗: ${error}`)
+      })
+    }
+    
+    this.log('🗑️ Web Audio 管理器已清理')
   }
 }
 
