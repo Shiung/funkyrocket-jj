@@ -85,11 +85,9 @@ export const useAudio = () => {
       logger.info('🎵 播放開場音樂')
     } else if (gameState === GameState.FLYING) {
       audioManager.value.playBGM('bgm_fly', true)
-      audioManager.value.playBGM('rocket_fly', true)  // 也播放火箭飛行音效
       logger.info('🎵 播放飛行音樂')
     } else if (gameState === GameState.DISEMBARKING) {
       audioManager.value.playBGM('bgm_fly', true)
-      audioManager.value.playBGM('rocket_fly', true)  // 下車階段繼續播放火箭音效
       logger.info('🎵 播放火箭音效')
     }
   }

@@ -130,7 +130,6 @@ const {
 const {
   isScrolling,
   scrollSpeed,
-  baseScrollSpeed,
   pageBackgroundImage,
   setDefaultBackground,
   setFrontCloud,
@@ -564,11 +563,6 @@ setupLifecycle({
     updateBackgroundScale,
     updateFrontCloudScale,
     updateCharactersScale,
-    resetScrollSpeed: () => {
-      if (isScrolling.value) {
-        scrollSpeed.value = baseScrollSpeed.value
-      }
-    },
     resetRocketFloat: () => {
       if (isScrolling.value) {
         stopRocketFloat()

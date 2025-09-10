@@ -67,7 +67,6 @@ export const useScene = () => {
     updateBackgroundScale?: () => void,
     updateFrontCloudScale?: () => void,
     updateCharactersScale?: () => void,
-    resetScrollSpeed?: () => void
     resetRocketFloat?: () => void,
   }): void => {
     const aspectRatio = DESIGN_WIDTH / DESIGN_HEIGHT // 原始比例
@@ -113,7 +112,6 @@ export const useScene = () => {
     updateBackgroundScale?: () => void,
     updateFrontCloudScale?: () => void,
     updateCharactersScale?: () => void,
-    resetScrollSpeed?: () => void
     resetRocketFloat?: () => void,
   }): void => {
     logger.info(`🔄 更新遊戲內容縮放，縮放因子: ${scaleFactorX.value.toFixed(2)}x${scaleFactorY.value.toFixed(2)}`)
@@ -131,10 +129,7 @@ export const useScene = () => {
       // 4. 更新角色
       updateFunctions.updateCharactersScale?.()
       
-      // 5. 重置滾動速度
-      updateFunctions.resetScrollSpeed?.()
-      
-      // 6. 更新火箭漂浮效果
+      // 5. 更新火箭漂浮效果
       updateFunctions.resetRocketFloat?.()
     }
   }
@@ -179,7 +174,6 @@ export const useScene = () => {
       updateBackgroundScale?: () => void,
       updateFrontCloudScale?: () => void,
       updateCharactersScale?: () => void,
-      resetScrollSpeed?: () => void,
       resetRocketFloat?: () => void,
     },
     cleanupFunctions?: {

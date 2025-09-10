@@ -328,16 +328,18 @@ export const useBackground = (getApp: () => any) => {
       const scale = gameWidth.value / texture.width
       const scaledHeight = texture.height * scale
       
-      cycleBackgroundSprites.forEach((sprite, i) => {
+      cycleBackgroundSprites.forEach((sprite) => {
         sprite.scale.set(scale)
         sprite.x = 0
-        sprite.y = Math.floor(-scaledHeight * (i + 1))
+        sprite.y += Math.floor(scaledHeight)
       })
     }
   }
 
   // 更新前景雲朵縮放
   const updateFrontCloudScale = async (): Promise<void> => {
+    if (isScrolling.value) return
+    
     const app = getApp()
     if (!app || !frontCloudSprite) return
     
