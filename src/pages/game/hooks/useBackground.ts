@@ -12,8 +12,8 @@ export const useBackground = (getApp: () => any) => {
   const {
     gameWidth,
     gameHeight,
-    scaleFactorX,
-    scaleFactorY
+    // scaleFactorX,
+    // scaleFactorY
   } = useBaseConfig()
   // 背景精靈實例
   let defaultBackgroundSprite: Sprite | null = null
@@ -24,10 +24,10 @@ export const useBackground = (getApp: () => any) => {
   const isScrolling = ref(false)
   const scrollSpeed = ref(5) // 滾動速度 (初始值)
   
-  // 計算屬性：滾動相關參數（根據縮放因子調整）
-  const baseScrollSpeed = computed(() => 5 * Math.min(scaleFactorX.value, scaleFactorY.value))
-  const speedIncrease = computed(() => 0.02 * Math.min(scaleFactorX.value, scaleFactorY.value))
-  const maxScrollSpeed = computed(() => 20 * Math.min(scaleFactorX.value, scaleFactorY.value))
+  // 計算屬性：滾動相關參數
+  const baseScrollSpeed = ref(5)
+  const speedIncrease = ref(0.02)
+  const maxScrollSpeed = ref(20)
 
   // 響應式資源路徑 - 固定使用 funkyRocket
   const defaultBackground = computed(() => 
@@ -328,16 +328,18 @@ export const useBackground = (getApp: () => any) => {
       const scale = gameWidth.value / texture.width
       const scaledHeight = texture.height * scale
       
-      cycleBackgroundSprites.forEach((sprite, i) => {
+      cycleBackgroundSprites.forEach((sprite) => {
         sprite.scale.set(scale)
         sprite.x = 0
-        sprite.y = Math.floor(-scaledHeight * (i + 1))
+        sprite.y += Math.floor(scaledHeight)
       })
     }
   }
 
   // 更新前景雲朵縮放
   const updateFrontCloudScale = async (): Promise<void> => {
+    if (isScrolling.value) return
+    
     const app = getApp()
     if (!app || !frontCloudSprite) return
     

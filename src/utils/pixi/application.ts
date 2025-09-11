@@ -2,6 +2,7 @@
  * PixiJS 應用程式相關工具函數
  */
 import * as PIXI from 'pixi.js'
+import { initDevtools } from '@pixi/devtools'
 import { checkRendererSupport, logRendererInfo } from './renderer'
 
 export interface AppConfig {
@@ -70,6 +71,9 @@ export async function createPixiApp(config: AppConfig): Promise<CreateAppResult>
     isWebGPU: app.renderer.type === PIXI.RendererType.WEBGPU,
     isWebGL: app.renderer.type === PIXI.RendererType.WEBGL
   }
+
+  // 初始化開發者工具
+  initDevtools({ app })
   
   return {
     app,

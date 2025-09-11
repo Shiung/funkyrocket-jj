@@ -34,6 +34,8 @@ export const useAudio = () => {
     const manager = new AudioManager(audioAssets.value, logger.createLogFunction())
     // 立即應用當前音量設定
     manager.setVolume(audioStore.normalizedVolume)
+    // 因為瀏覽器安全限制，要使用者點擊過才能播放音效，那就第一次點擊就全部播一次
+    manager.playAudioOnFirstClick()
     return manager
   }
 
@@ -83,11 +85,9 @@ export const useAudio = () => {
       logger.info('🎵 播放開場音樂')
     } else if (gameState === GameState.FLYING) {
       audioManager.value.playBGM('bgm_fly', true)
-      audioManager.value.playBGM('rocket_fly', true)  // 也播放火箭飛行音效
       logger.info('🎵 播放飛行音樂')
     } else if (gameState === GameState.DISEMBARKING) {
       audioManager.value.playBGM('bgm_fly', true)
-      audioManager.value.playBGM('rocket_fly', true)  // 下車階段繼續播放火箭音效
       logger.info('🎵 播放火箭音效')
     }
   }

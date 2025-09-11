@@ -21,6 +21,8 @@ export default defineConfig({
   },
   assetsInclude: ['**/*.atlas', '**/*.skel', '**/*.avif', '**/*.png', '**/*.mp3'],
   server: {
+    host: '0.0.0.0', // 允許外部設備訪問
+    port: 5173,
     fs: {
       allow: ['..']
     }

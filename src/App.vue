@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
+
+const router = useRouter()
+router.replace('/game')
 </script>
 
 <template>

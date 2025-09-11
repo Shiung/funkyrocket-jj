@@ -9,14 +9,14 @@ const router = createRouter({
       component: () => import('@/pages/index.vue'),
     },
     {
-      path: '/funky-rocket-demo',
-      name: 'funky-rocket-demo',
-      component: () => import('@/pages/funky-rocket-demo/index.vue'),
+      path: '/game',
+      name: 'game',
+      component: () => import('@/pages/game/index.vue'),
     },
     {
-      path: '/funky-rocket-showcase',
-      name: 'funky-rocket-showcase',
-      component: () => import('@/pages/funky-rocket-showcase/index.vue'),
+      path: '/showcase',
+      name: 'showcase',
+      component: () => import('@/pages/showcase/index.vue'),
     },
   ],
 })

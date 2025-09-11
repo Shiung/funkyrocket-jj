@@ -130,7 +130,6 @@ const {
 const {
   isScrolling,
   scrollSpeed,
-  baseScrollSpeed,
   pageBackgroundImage,
   setDefaultBackground,
   setFrontCloud,
@@ -163,7 +162,7 @@ const initScene = async (): Promise<void> => {
     
     setState(GameState.IDLE)
     logger.info('✅ Funky Rocket 遊戲場景初始化完成')
-    
+
   } catch (error) {
     logger.error(`❌ 場景初始化失敗: ${error}`)
   }
@@ -277,7 +276,7 @@ const launchRocket = async (): Promise<void> => {
     
     playRocketAnimation('rocket_shake', false)
     
-    playSound('rocket_prelaunch')
+    playBGM('rocket_prelaunch', false)
     
     // 等待1秒
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -301,11 +300,6 @@ const launchRocket = async (): Promise<void> => {
       playBGM('bgm_fly', true)
     }
 
-    // 播放火箭飛行音效（如果BGM開關啟用）
-    if (bgmEnabled.value) {
-      playBGM('rocket_fly', true)
-    }
-    
     // 進入下車階段
     setState(GameState.DISEMBARKING)
     logger.info('✅ 火箭發射完成，進入下車階段')
@@ -323,7 +317,10 @@ const launchRocket = async (): Promise<void> => {
 // 玩家下車
 const playerDisembark = async (): Promise<void> => {
   logger.info('🎯 玩家下車按鈕被點擊')
-  const character = await createCharacterJump('player', `player-disembark-${Date.now()}`, '玩家下車囉')
+  const character = await createCharacterJump('player', `player-disembark-${Date.now()}`, { 
+    name: '玩家下車囉', 
+    odds: '9999999.99x' 
+  })
   if (!character) return
 
   removeCharacterFromBoard('player')
@@ -352,7 +349,10 @@ const streamerDisembark = async (): Promise<void> => {
     await new Promise(resolve => setTimeout(resolve, 1500))
   }
 
-  const character = await createCharacterJump('streamer', `streamer-disembark-${Date.now()}`, '主播下車囉')
+  const character = await createCharacterJump('streamer', `streamer-disembark-${Date.now()}`, { 
+    name: '主播下車囉', 
+    odds: '9999999.99x' 
+  })
   if (!character) return
 
   removeCharacterFromBoard('streamer')
@@ -563,11 +563,6 @@ setupLifecycle({
     updateBackgroundScale,
     updateFrontCloudScale,
     updateCharactersScale,
-    resetScrollSpeed: () => {
-      if (isScrolling.value) {
-        scrollSpeed.value = baseScrollSpeed.value
-      }
-    },
     resetRocketFloat: () => {
       if (isScrolling.value) {
         stopRocketFloat()
