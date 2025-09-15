@@ -1,7 +1,7 @@
 /**
  * PixiJS 資源管理相關工具函數
  */
-import * as PIXI from 'pixi.js'
+import { Assets } from 'pixi.js'
 
 export interface SpineAssets {
   skelPath: string
@@ -40,18 +40,18 @@ export async function loadSpineAssets(
   
   // 註冊資源
   log('註冊並載入資源到緩存...')
-  PIXI.Assets.add({ alias: skelKey, src: assets.skelPath })
-  PIXI.Assets.add({ alias: atlasKey, src: assets.atlasPath })
+  Assets.add({ alias: skelKey, src: assets.skelPath })
+  Assets.add({ alias: atlasKey, src: assets.atlasPath })
   
   const assetsToLoad = [skelKey, atlasKey]
   
   if (assets.imagePath && imageKey) {
-    PIXI.Assets.add({ alias: imageKey, src: assets.imagePath })
+    Assets.add({ alias: imageKey, src: assets.imagePath })
     assetsToLoad.push(imageKey)
   }
   
   // 載入資源
-  await PIXI.Assets.load(assetsToLoad)
+  await Assets.load(assetsToLoad)
   log('✅ Spine 動畫資源載入完成')
   
   return {

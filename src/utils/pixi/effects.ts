@@ -1,7 +1,7 @@
 /**
  * Spine 動畫特效相關工具函數
  */
-import * as SPINE from '@esotericsoftware/spine-pixi-v8'
+import { Spine } from '@esotericsoftware/spine-pixi-v8'
 
 export interface FloatConfig {
   range: number
@@ -29,7 +29,7 @@ export interface EffectState {
  * 創建漂浮效果
  */
 export function createFloatEffect(
-  spine: SPINE.Spine,
+  spine: Spine,
   config: FloatConfig,
   onUpdate?: (x: number, y: number, rotation: number) => void
 ): EffectState {
@@ -78,7 +78,7 @@ export function createFloatEffect(
  * 創建震動效果
  */
 export function createShakeEffect(
-  spine: SPINE.Spine,
+  spine: Spine,
   config: ShakeConfig,
   onUpdate?: (progress: number, x: number, y: number, rotation: number) => void,
   onComplete?: () => void

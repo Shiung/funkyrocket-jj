@@ -3,7 +3,7 @@
  * 用於創建、管理和更新 PixiJS 文字物件
  */
 
-import * as PIXI from 'pixi.js'
+import { Text, TextStyle, type Application } from 'pixi.js'
 
 export interface TextConfig {
   /** 文字內容 */
@@ -53,7 +53,7 @@ export interface TextTransform {
 
 export interface CreateTextResult {
   /** PixiJS 文字物件 */
-  textObject: PIXI.Text
+  textObject: Text
   /** 更新文字內容 */
   updateText: (newText: string) => void
   /** 更新樣式 */
@@ -104,7 +104,7 @@ export function createPixiText(
     log(`📝 創建文字物件: "${finalConfig.text}"`)
     
     // 創建文字樣式
-    const textStyle = new PIXI.TextStyle({
+    const textStyle = new TextStyle({
       fontFamily: finalConfig.fontFamily,
       fontSize: finalConfig.fontSize,
       fill: finalConfig.fill,
@@ -124,7 +124,7 @@ export function createPixiText(
     })
     
     // 創建文字物件
-    const textObject = new PIXI.Text({
+    const textObject = new Text({
       text: finalConfig.text,
       style: textStyle
     })
@@ -146,7 +146,7 @@ export function createPixiText(
       
       updateStyle(styleConfig: Partial<TextConfig>) {
         try {
-          const currentStyle = textObject.style as PIXI.TextStyle
+          const currentStyle = textObject.style as TextStyle
           const mergedConfig = { ...finalConfig, ...styleConfig }
           
           // 更新樣式屬性
@@ -243,7 +243,7 @@ export function createPixiText(
  * 為文字物件添加到舞台
  */
 export function addTextToStage(
-  app: PIXI.Application,
+  app: Application,
   textResult: CreateTextResult,
   transform?: TextTransform,
   logFunction?: (message: string) => void

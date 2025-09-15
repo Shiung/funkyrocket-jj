@@ -1,7 +1,7 @@
 /**
  * Spine 動畫相關工具函數
  */
-import * as SPINE from '@esotericsoftware/spine-pixi-v8'
+import { Spine, type TrackEntry } from '@esotericsoftware/spine-pixi-v8'
 import { loadSpineAssets, type SpineAssets, type LoadedAssets } from './assets'
 
 export interface SpineConfig extends SpineAssets {
@@ -9,7 +9,7 @@ export interface SpineConfig extends SpineAssets {
 }
 
 export interface CreateSpineResult {
-  spine: SPINE.Spine
+  spine: Spine
   loadedAssets: LoadedAssets
   animations: string[]
 }
@@ -35,7 +35,7 @@ export async function createSpineAnimation(config: SpineConfig): Promise<CreateS
   const loadedAssets = await loadSpineAssets({ skelPath, atlasPath, imagePath }, logger)
   
   // 創建 Spine 動畫實例
-  const spine = SPINE.Spine.from({ 
+  const spine = Spine.from({ 
     skeleton: skelPath, 
     atlas: atlasPath 
   })
@@ -57,11 +57,11 @@ export async function createSpineAnimation(config: SpineConfig): Promise<CreateS
  * 播放指定動畫
  */
 export function playSpineAnimation(
-  spine: SPINE.Spine,
+  spine: Spine,
   animationName: string,
   loop: boolean = true,
   logger?: (message: string) => void
-): SPINE.TrackEntry | null {
+): TrackEntry | null {
   const log = logger || console.log
   
   try {
@@ -80,13 +80,13 @@ export function playSpineAnimation(
 }
 
 export function playSpineAnimationWithTrack(
-  spine: SPINE.Spine,
+  spine: Spine,
   animationName: string,
   loop: boolean = true,
   track: number = 1,
   delay: number = 0,
   logger?: (message: string) => void
-): SPINE.TrackEntry | null {
+): TrackEntry | null {
   const log = logger || console.log
   
   try {
@@ -108,7 +108,7 @@ export function playSpineAnimationWithTrack(
  * 設置動畫播放速度
  */
 export function setSpineAnimationSpeed(
-  spine: SPINE.Spine, 
+  spine: Spine, 
   speed: number,
   logger?: (message: string) => void
 ): void {
@@ -126,7 +126,7 @@ export function setSpineAnimationSpeed(
  * 應用變換到 Spine 動畫
  */
 export function applySpineTransform(
-  spine: SPINE.Spine, 
+  spine: Spine, 
   transform: SpineTransform,
   logger?: (message: string) => void
 ): void {
@@ -181,7 +181,7 @@ export function applySpineTransform(
 /**
  * 獲取 Spine 動畫的詳細信息
  */
-export function getSpineInfo(spine: SPINE.Spine): {
+export function getSpineInfo(spine: Spine): {
   animations: string[]
   bones: string[]
   skins: string[]
@@ -214,7 +214,7 @@ export function getSpineInfo(spine: SPINE.Spine): {
 /**
  * 清理 Spine 動畫狀態
  */
-export function clearSpineStateWithTrack(spine: SPINE.Spine, track: number, logger?: (message: string) => void): void {
+export function clearSpineStateWithTrack(spine: Spine, track: number, logger?: (message: string) => void): void {
   const log = logger || console.log
   
   try {
@@ -229,7 +229,7 @@ export function clearSpineStateWithTrack(spine: SPINE.Spine, track: number, logg
 /**
  * 清理全部 Spine 動畫狀態
  */
-export function clearSpineState(spine: SPINE.Spine, logger?: (message: string) => void): void {
+export function clearSpineState(spine: Spine, logger?: (message: string) => void): void {
   const log = logger || console.log
   
   try {
