@@ -14,8 +14,10 @@ export const useScene = () => {
     DESIGN_HEIGHT,
     gameWidth,
     gameHeight,
+    isDesktop,
     scaleFactorX,
-    scaleFactorY
+    scaleFactorY,
+    judgeDeviceType,
   } = useBaseConfig()
 
   // Canvas 引用
@@ -61,7 +63,7 @@ export const useScene = () => {
     }
   }
 
-  // 響應式更新遊戲尺寸 - 保持比例，確保完全顯示在螢幕內
+  // 響應式更新遊戲尺寸 - 根據裝置類型採用不同策略
   const updateGameSize = (updateFunctions?: {
     updateRocketScale?: () => void,
     updateBackgroundScale?: () => void,
@@ -69,38 +71,40 @@ export const useScene = () => {
     updateCharactersScale?: () => void,
     resetRocketFloat?: () => void,
   }): void => {
-    const aspectRatio = DESIGN_WIDTH / DESIGN_HEIGHT // 原始比例
     const parentDom = document.getElementById('app')
     const viewportWidth = parentDom?.clientWidth || DESIGN_WIDTH
     const viewportHeight = parentDom?.clientHeight || DESIGN_HEIGHT
-    
-    // 計算按高度和寬度縮放的尺寸
-    const heightBasedWidth = Math.round(viewportHeight * aspectRatio)
-    const widthBasedHeight = Math.round(viewportWidth / aspectRatio)
 
-    console.log('### heightBasedWidth', heightBasedWidth)
-    console.log('### widthBasedHeight', widthBasedHeight)
+    isDesktop.value = judgeDeviceType()
 
-    console.log('### viewportWidth', viewportWidth)
-    console.log('### viewportHeight', viewportHeight)
     
-    // 選擇能完全顯示在螢幕內的尺寸
-    if (heightBasedWidth <= viewportWidth) {
-      // 以高度為準
-      gameHeight.value = viewportHeight
-      gameWidth.value = heightBasedWidth
+    if (isDesktop.value) {
+      // PC裝置：保持750x1624比例，其餘用pageBackgroundImage填滿
+      const aspectRatio = DESIGN_WIDTH / DESIGN_HEIGHT
+      const heightBasedWidth = Math.round(viewportHeight * aspectRatio)
+      const widthBasedHeight = Math.round(viewportWidth / aspectRatio)
+      
+      if (heightBasedWidth <= viewportWidth) {
+        gameHeight.value = viewportHeight
+        gameWidth.value = heightBasedWidth
+      } else {
+        gameWidth.value = viewportWidth
+        gameHeight.value = widthBasedHeight
+      }
+      
+      logger.info(`🖥️ PC模式: 遊戲尺寸 ${gameWidth.value}x${gameHeight.value} (視窗: ${viewportWidth}x${viewportHeight})`)
     } else {
-      // 以寬度為準
+      // 手機裝置：使用實際螢幕比例，背景會被裁切
       gameWidth.value = viewportWidth
-      gameHeight.value = widthBasedHeight
+      gameHeight.value = viewportHeight
+      
+      logger.info(`📱 手機模式: 遊戲尺寸 ${gameWidth.value}x${gameHeight.value} (視窗: ${viewportWidth}x${viewportHeight})`)
     }
     
     // 更新 PixiJS 應用尺寸
     if (app) {
       app.renderer.resize(gameWidth.value, gameHeight.value)
     }
-    
-    logger.info(`🖼️ 遊戲尺寸已更新: ${gameWidth.value}x${gameHeight.value} (視窗: ${viewportWidth}x${viewportHeight})`)
     
     // 重新繪製遊戲內容以適應新的縮放因子
     updateGameContentScale(updateFunctions)

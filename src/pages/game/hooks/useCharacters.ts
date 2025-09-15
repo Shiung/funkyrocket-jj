@@ -20,8 +20,28 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
     scaleFactorX,
     // scaleFactorY,
     baseScale,
-    baseOffsetY
+    baseOffsetY,
+    backgroundOffset,
+    isDesktop
   } = useBaseConfig()
+  
+  // 計算角色上車X座標的調整（只調整X，Y維持原本邏輯）
+  const calculateCharacterBoardingX = (baseX: number) => {
+    if (isDesktop.value) {
+      // PC模式：直接使用原始X座標
+      return baseX
+    }
+    
+    // 手機模式：只調整X座標，考慮背景的左右偏移
+    const offset = backgroundOffset.value
+    
+    // 如果背景被左右裁切（負的offsetX），角色位置需要相應調整
+    const adjustedX = baseX + offset.offsetX * 0.5  // 使用部分偏移量
+    
+    console.log(`🎯 角色X座標調整 - 原始X: ${baseX} → 調整X: ${adjustedX.toFixed(0)}, 背景偏移: ${offset.offsetX}`)
+    
+    return adjustedX
+  }
   // 角色實例管理
   const characters: Map<string, Character> = new Map()
 
@@ -35,7 +55,7 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
   }
 
   // 創建角色（走路動畫）
-  const createCharacterWalk = async (type: CharacterType, id: string): Promise<Character | null> => {
+  const createCharacterWalk = async (type: CharacterType, id: string, direction: 'left' | 'right'): Promise<Character | null> => {
     const app = getApp()
     if (!app) return null
   
@@ -54,12 +74,16 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
       
       const spine = spineResult.spine
       
-      // 設定角色起始位置 - 所有角色都從正中間開始 (考慮縮放因子)
+      // 設定角色起始位置 - 從螢幕邊緣開始，增加動畫距離
       const scale = baseScale.value * 1.5  // 放大角色，讓它更明顯
-      const startX = gameWidth.value / 2 // 從正中間開始
+      
+      // 玩家和主播從左側開始，NPC從右側開始，距離螢幕邊緣20%的位置
+      const isFromLeft = direction === 'left'
+      const directionOffsetX = isFromLeft ? -80 : 80
+      const startX = gameWidth.value / 2 + directionOffsetX * scaleFactorX.value
       const startY = gameHeight.value / 2 + baseOffsetY.value  // 接近地面位置 + 基礎偏移量
       
-      logger.info(`🎯 角色起始位置: (${startX}, ${startY}), 畫面大小: ${gameWidth.value}x${gameHeight.value}`)
+      logger.info(`🎯 角色起始位置: (${startX.toFixed(0)}, ${startY.toFixed(0)}), 畫面大小: ${gameWidth.value}x${gameHeight.value}, 類型: ${type}`)
       
       // 玩家和主播需要鏡像反轉
       const shouldFlip = type === 'player' || type === 'streamer'
@@ -107,15 +131,23 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
         // 播放跳躍動畫（原地跳躍）
         playSpineAnimation(character.spine, animationName, false)
         
-        // 移動到火箭附近的地面位置 (考慮縮放因子)
-        const directionOffsetX = (isNpc ? 30 : -30) * scaleFactorX.value // 偏移量也要縮放
-        const targetX = gameWidth.value / 2 + directionOffsetX // 畫面水平中心點
-        const targetY = gameHeight.value / 2 + baseOffsetY.value  // 畫面中心 + 基礎偏移量
+        // 移動到火箭附近的地面位置，終點更靠近中心
+        const baseTargetX = gameWidth.value / 2 // 畫面水平中心點
+        const directionOffsetY = baseOffsetY.value - 15 * baseScale.value // 增加偏移量，讓動畫更明顯
+        const baseTargetY = gameHeight.value / 2 + directionOffsetY  // 畫面中心 + 基礎偏移量
+        
+        // 只調整X座標（考慮手機模式的背景偏移），Y座標維持原本邏輯
+        const targetX = calculateCharacterBoardingX(baseTargetX)
+        const targetY = baseTargetY  // Y座標維持原本比例，讓動畫距離隨螢幕高度調整
         
         const startX = character.position.x
         const startY = character.position.y
         const duration = 3000 // 3秒
         const startTime = Date.now()
+        
+        // 計算動畫距離
+        const animationDistance = Math.sqrt(Math.pow(targetX - startX, 2) + Math.pow(targetY - startY, 2))
+        logger.info(`🏃 ${character.type} 上車動畫 - 起點: (${startX.toFixed(0)}, ${startY.toFixed(0)}) → 終點: (${targetX.toFixed(0)}, ${targetY.toFixed(0)}), 距離: ${animationDistance.toFixed(0)}px`)
         
         const animate = () => {
           const elapsed = Date.now() - startTime

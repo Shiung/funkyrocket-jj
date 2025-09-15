@@ -47,6 +47,7 @@ export class AudioManager {
   private audioContext!: AudioContext
   private buffers = new Map<string, AudioBuffer>()
   private activeBGMs = new Map<string, AudioBufferSourceNode>() // 支援多個 BGM 同時播放
+  private peddingBGMs = new Set<string>() // 待播放的 BGM
   private gainNode!: GainNode // 主音量控制
   private logger?: (message: string) => void
   private defaultVolume: number = 0.5
@@ -97,6 +98,8 @@ export class AudioManager {
 
       try {
         this.isContextReady = true
+        // 播放所有待播放的 BGM
+        this.peddingBGMs.forEach(key => this.playBGM(key))
         this.log('✅ Web Audio Context 已解鎖')
       } catch (error) {
         this.log(`Web Audio Context 解鎖失敗: ${error}`)
@@ -113,7 +116,12 @@ export class AudioManager {
   }
 
   playBGM(key: string, loop: boolean = true): void {
-    if (!this.isContextReady) return this.log(`🔒 BGM 待播放: ${key} (等待用戶互動)`)
+    // 如果音頻未解鎖，先加入待播放列表
+    if (!this.isContextReady) {
+      this.peddingBGMs.add(key)
+      this.log(`🔒 BGM 待播放: ${key} (等待用戶互動)`)
+      return
+    }
 
     // 如果這個 BGM 已經在播放，先停止
     this.stopBGM(key)
@@ -137,32 +145,40 @@ export class AudioManager {
     }
   }
 
-  stopBGM(key?: string): void {
-    if (key) {
-      // 停止特定的 BGM
-      const source = this.activeBGMs.get(key)
-      if (!source) return
+  stopBGM(key: string): void {
+    // 音頻未解鎖
+    if (!this.isContextReady) {
+      this.peddingBGMs.delete(key)
+      return
+    }
 
+    // 停止特定的 BGM
+    const source = this.activeBGMs.get(key)
+    if (!source) return
+
+    try {
+      source.stop()
+    } catch {
+      // BufferSource 可能已經停止，忽略錯誤
+    }
+    this.activeBGMs.delete(key)
+    this.log(`🎵 BGM 已停止: ${key}`)
+  }
+
+  stopAllBGM(): void {
+    // 為觸發音頻解鎖
+    if (!this.isContextReady) return this.peddingBGMs.clear()
+    // 停止所有 BGM
+    this.activeBGMs.forEach((source, bgmKey) => {
       try {
         source.stop()
       } catch {
         // BufferSource 可能已經停止，忽略錯誤
       }
-      this.activeBGMs.delete(key)
-      this.log(`🎵 BGM 已停止: ${key}`)
-    } else {
-      // 停止所有 BGM
-      this.activeBGMs.forEach((source, bgmKey) => {
-        try {
-          source.stop()
-        } catch {
-          // BufferSource 可能已經停止，忽略錯誤
-        }
-        this.log(`🎵 BGM 已停止: ${bgmKey}`)
-      })
-      this.activeBGMs.clear()
-      this.log('🎵 所有 BGM 已停止')
-    }
+      this.log(`🎵 BGM 已停止: ${bgmKey}`)
+    })
+    this.activeBGMs.clear()
+    this.log('🎵 所有 BGM 已停止')
   }
 
   playSound(key: string): void {
@@ -202,7 +218,7 @@ export class AudioManager {
 
   dispose(): void {
     // 停止所有 BGM
-    this.stopBGM()
+    this.stopAllBGM()
     
     // 清理音頻緩衝區
     this.buffers.clear()
