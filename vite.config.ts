@@ -19,7 +19,7 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
-  assetsInclude: ['**/*.atlas', '**/*.skel', '**/*.avif', '**/*.png', '**/*.mp3'],
+  assetsInclude: ['**/*.atlas', '**/*.skel', '**/*.webp', '**/*.png', '**/*.mp3'],
   server: {
     host: '0.0.0.0', // 允許外部設備訪問
     port: 5173,

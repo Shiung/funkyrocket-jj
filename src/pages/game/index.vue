@@ -1,5 +1,10 @@
 <template>
-  <div class="h-screen text-white relative overflow-hidden" :style="{ backgroundImage: pageBackgroundImage, backgroundSize: 'cover', backgroundPosition: 'center' }">
+  <div class="h-screen text-white relative overflow-hidden" :style="{ 
+    backgroundImage: isDesktop ? pageBackgroundImage : 'none', 
+    backgroundSize: 'cover', 
+    backgroundPosition: 'center',
+    backgroundColor: isDesktop ? 'transparent' : '#000000'
+  }">
     <!-- PixiJS Canvas 游戲本體 - 保持寬度比例，高度100vh -->
     <canvas 
       ref="canvasRef" 
@@ -88,7 +93,8 @@ const {
 // 基礎配置管理
 const {
   gameWidth,
-  gameHeight
+  gameHeight,
+  isDesktop
 } = useBaseConfig()
 
 // 場景管理
@@ -183,7 +189,7 @@ const startGame = (): void => {
 
 // 玩家上車
 const playerBoard = async (): Promise<void> => {
-  const character = await createCharacterWalk('player', `player-${Date.now()}`)
+  const character = await createCharacterWalk('player', `player-${Date.now()}`, 'left')
   if (!character) return
 
   addCharacterToBoard('player')
@@ -195,7 +201,7 @@ const playerBoard = async (): Promise<void> => {
 // 主播上車
 const streamerBoard = async (): Promise<void> => {
   
-  const character = await createCharacterWalk('streamer', `streamer-${Date.now()}`)
+  const character = await createCharacterWalk('streamer', `streamer-${Date.now()}`, 'left')
   if (!character) return
 
   addCharacterToBoard('streamer')
@@ -224,7 +230,7 @@ const streamerBoard = async (): Promise<void> => {
 // NPC上車
 const npcBoard = async (): Promise<void> => {
   
-  const character = await createCharacterWalk('npc', `npc-${Date.now()}`)
+  const character = await createCharacterWalk('npc', `npc-${Date.now()}`, 'right')
   if (!character) return
 
   addCharacterToBoard('npc')

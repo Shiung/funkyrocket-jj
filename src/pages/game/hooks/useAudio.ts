@@ -65,7 +65,7 @@ export const useAudio = () => {
       logger.info('🎵 BGM 已開啟')
     } else {
       // 停止所有 BGM
-      audioManager.value.stopBGM()
+      audioManager.value.stopAllBGM()
       logger.info('🎵 BGM 已關閉')
     }
   }
@@ -107,17 +107,15 @@ export const useAudio = () => {
   // 停止指定 BGM
   const stopBGM = (key?: string): void => {
     if (!audioManager.value) return
-    if (key) {
-      audioManager.value.stopBGM(key)
-    } else {
-      audioManager.value.stopBGM()
-    }
+
+    if (key) audioManager.value.stopBGM(key)
+    else audioManager.value.stopAllBGM()
   }
 
   // 停止所有音效
   const stopAllAudio = (): void => {
     if (audioManager.value) {
-      audioManager.value.stopBGM()
+      audioManager.value.stopAllBGM()
       logger.info('🔇 停止所有音效')
     }
   }
