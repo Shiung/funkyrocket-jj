@@ -43,14 +43,16 @@
       @changeGameState="changeGameState"
     />
   </div>
+  <Loading v-if="isLoading" :isReadyToPlay="isReadyToPlay" @close="handleCloseLoadingEvent" />
 </template>
 
 <script setup lang="ts">
-
+import { ref } from 'vue'
 import { createLogger } from '@/utils/pixi/logger'
 
 import HamburgerMenu from './components/HamburgerMenu.vue'
 import BottomSheet from './components/BottomSheet.vue'
+import Loading from './components/Loading.vue'
 import { GameState } from './types'
 import { useAudio } from './hooks/useAudio'
 import { useGameState } from './hooks/useGameState'
@@ -149,6 +151,15 @@ const {
   destroyBackground
 } = useBackground(getApp)
 
+// 處理 Loading 事件
+const isLoading = ref(true)
+// 場景是否init完成且可以開始遊戲
+const isReadyToPlay = ref(false)
+const handleCloseLoadingEvent = (): void => {
+  isLoading.value = false
+  logger.info('🔄 關閉 Loading 事件')
+}
+
 // 場景初始化
 const initScene = async (): Promise<void> => {
   try {
@@ -168,6 +179,9 @@ const initScene = async (): Promise<void> => {
     
     setState(GameState.IDLE)
     logger.info('✅ Funky Rocket 遊戲場景初始化完成')
+
+    // 5. 設置場景初始化完成
+    isReadyToPlay.value = true
 
   } catch (error) {
     logger.error(`❌ 場景初始化失敗: ${error}`)
