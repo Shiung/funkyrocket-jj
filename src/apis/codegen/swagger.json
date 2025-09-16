@@ -1,0 +1,851 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "CashOrCrash Game API",
+    "description": "## API Overview\n### 使用說明\n\n1. 使用 RESTful 端點發送行為請求。\n2. 連接到 WebSocket 服務器以獲取遊戲狀態即時更新。\n\n### Init Game Flow\n1. 平台方與 Funky 取得 launch info \n   1. 此次請求會取得 launch game url 以及一組 token，以下統稱 session token\n2. 開啟前端 client，發送 consumePlayer 請求並且帶上 session token 用以驗證\n   1. 此次請求會取得另一組 token，以下統稱 auth token\n   2. auth token 保留，後續 request 都需要將此 token 帶入 header Authorization 欄位\n3. 發送 gameInfo 請求\n   1. 此次請求會取得玩家 & 遊戲的當前基本資訊，以及 socketUrl + socketToken\n4. 使用 socketUrl + socketToken 建立 ws 連線\n5. 始可開始進行遊戲操作\n\n### Api Error Code Mapping\n\n```\nNoError = 0,\nTokenExpired = 1,\nBadAuthorization = 2,\nInvalidInput = 3,\nOverBetCredit = 4,\nOverPlayerMaxWin = 5,\nOverPlayerMaxLose = 6,\nPlayerIsNotLogin = 7,\nApiSuspended = 8,\nInternalError = 9,\nOverMaxBet = 10,\nLowerThanMinBet = 11,\nBetTooFrequent = 12,\nApiError = 13,\nInputIncorrect = 14,\nInvalidGameStatus = 15,\nCannotFindOldLiveGameId = 16,\nBetNotFound = 17,\nBetSettled = 18,\nBetCanceled = 19,\nBetExisted = 20,\nInsufficientBalance = 21,\nBadRequest = 22,\nUnauthorized = 23,\nForbidden = 24,\nOperatorInternalServerError = 25,\nExitedOrdersCannotChangeTableLimit = 26,\nVoucherIsNotValid = 27,\nVoucherNotApplied = 28,\nCanNotFindTableLimit = 29,\nGetPlayerFail = 30,\nGameIsMaintain = 31,\nTableLimitNotFound = 32,\nBetIsRunning = 33,\nInternalServerError = 500,\nDBError = 29999,\nBetWasCanceled = 30000,\nInvalidPlayerConnectionStatus = 30001,\n```\n",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/cashorcrash/player/betdetail": {
+      "get": {
+        "tags": [
+          "BetDetail"
+        ],
+        "parameters": [
+          {
+            "name": "refNo",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetDetailResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetDetailResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cashorcrash/player/betlist": {
+      "post": {
+        "tags": [
+          "BetDetail"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetListRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetListRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetListRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetAbstractDetailPagedResult"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetAbstractDetailPagedResult"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetAbstractDetailPagedResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cashorcrash/operator/betdetail": {
+      "get": {
+        "tags": [
+          "BetDetail"
+        ],
+        "parameters": [
+          {
+            "name": "payload",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gameFrom",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "time",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetDetailResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetDetailResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cashorcrash/CashOut": {
+      "post": {
+        "tags": [
+          "CashOut"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CashOutRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CashOutRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CashOutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashOutResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashOutResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashOutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cashorcrash/GameInfo": {
+      "post": {
+        "tags": [
+          "GameInfo"
+        ],
+        "description": "Request body 請留空，無須帶入 tableLimitId",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GameInfoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GameInfoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GameInfoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameInfoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameInfoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cashorcrash/GetBalance": {
+      "get": {
+        "tags": [
+          "GetBalance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBalanceResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBalanceResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBalanceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cashorcrash/PlaceOrder": {
+      "post": {
+        "tags": [
+          "PlaceOrder"
+        ],
+        "description": "betoption 請帶 'OnBoard'",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceOrderRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceOrderRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceOrderResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceOrderResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaceOrderResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/gameChannels": {
+      "get": {
+        "tags": [
+          "WebSocket info"
+        ],
+        "summary": "WebSocket Connection",
+        "description": "## WebSocket Info\n\n後端會持續發送訊息，並使用 `action` 欄位（數字類型）來標註訊息的類型和狀態。<br>以下是定義的所有動作及其詳細說明\n\n## 訊息類型概覽\n\n以下是所有支援的動作類型及其對應的 `action` 編號：\n\n- **JOIN_GAME**: 0\n- **UPDATE_PLAYER_COUNT**: 1（已棄用）\n- **OPEN_BET**: 2\n- **CLOSE_BET**: 3\n- **GAME_RESULT**: 4\n- **BET_RESULT**: 5\n- **SYNC_TIMER**: 8\n- **GET_HISTORY**: 10\n- **UPDATE_OTHER_CHIPS**: 11\n- **GET_BALANCE**: 12\n- **DRAWING**: 14\n- **CASH_OUT**: 15\n\n---\n\n### JOIN_GAME (action: 0)\n\n- **描述**: 新的一局遊戲開啟。\n- **範例**:\n  ```json\n  {\n    \"createdGameTime\": \"2025-03-19T23:15:38.244671-04:00\",\n    \"liveGameId\": 4112336109,\n    \"action\": 0\n  }\n  ```\n\n### ~~*UPDATE_PLAYER_COUNT*~~ (action: 1)\n\n- **描述**: 已棄用\n- **範例**: 已棄用\n\n  ```json\n  {\n    \"action\": 1,\n    \"activePlayer\": 5,\n    \"gameManagerId\": \"default\",\n    \"gameManagerType\": \"602817\"\n  }\n  ```\n\n### OPEN_BET (action: 2)\n\n- **描述**: 新的一局開始\n  - `(countDown)` 該局開始倒數的秒數\n- **範例**:\n  ```json\n  { \"countDown\": 10, \"liveGameId\": 4112336109, \"action\": 2 }\n  ```\n\n### CLOSE_BET (action: 3)\n\n- **描述**: 停止收注\n- **範例**:\n\n  ```json\n  { \"liveGameId\": 4112336109, \"action\": 3 }\n  ```\n\n### GAME_RESULT (action: 4)\n\n- **描述**: 火箭爆炸，爆炸時的秒數及結果\n- **範例**:\n\n  ```json\n  { \"currentSecond\": 5.8, \"odds\": 3.7, \"liveGameId\": 4112336109, \"action\": 4 }\n  ```\n\n### BET_RESULT (action: 5)\n\n- **描述**: 後端結算\n- **範例**:\n\n  ```json\n  { \"liveGameId\": 4112336109, \"action\": 5 }\n  ```\n\n### SYNC_TIMER (action: 8)\n\n- **描述**:\n  - `(countDown)` 現在秒數值，每秒更新，第一個訊息與 OPEN_BET 同時\n- **範例**:\n\n  ```json\n  { \"countDown\": 10, \"liveGameId\": 4112336109, \"action\": 8 }\n  { \"countDown\": 9, \"liveGameId\": 4112336109, \"action\": 8 }\n  ```\n\n### GET_HISTORY (action: 10)\n\n- **描述**: 過去 30 局結果，最高長度為 30，新紀錄會出現在陣列前面，超過 30 局會 pop 掉舊的資料\n- **範例**:\n\n  ```json\n  {\n    \"gameHistory\": [\n      1.62, 2.23, 1.07, 1.7, 1.41, 1.23, 1.62, 2.04, 1.29, 1.17, 1.23, 1.29,\n      4.45, 0.0, 1.02, 1.86, 1.41, 2.57, 7.73, 1.7, 0.0, 1.48, 3.23, 8.47, 1.12,\n      3.7, 0.0, 1.95, 1.23, 20.28\n    ],\n    \"liveGameId\": 4112336109,\n    \"action\": 10\n  }\n  ```\n\n### UPDATE_OTHER_CHIPS (action: 11)\n\n- **描述**:\n  - `(onBoards)` 目前上船人數，\n  - `(othersPlayers)` 最新上船玩家列表，最高長度為 12，新上船的玩家會出現在陣列前面，超過 12 人會 pop 掉舊的資料\n- **範例**:\n\n  ```json\n  {\n    \"onBoards\": 3,\n    \"othersPlayers\": [\n        { \"playerName\": \"FI***608\", \"playerId\": \"FIB+bngiy95v+608\" },\n        { \"playerName\": \"FI***171\", \"playerId\": \"FIB+68j8warj+171\" },\n        { \"playerName\": \"FI***040\", \"playerId\": \"FIB+fc1apezc+040\" }\n    ],\n    \"liveGameId\": 4112336109,\n    \"action\": 11\n  }\n  {\n    \"onBoards\": 13,\n    \"othersPlayers\": [\n        { \"playerName\": \"FI***187\", \"playerId\": \"FIB+jow5gj6h+187\" },\n        { \"playerName\": \"FI***862\", \"playerId\": \"FIB+6wg3vjg0+862\" },\n        { \"playerName\": \"FI***961\", \"playerId\": \"FIB+bxukmsdd+961\" },\n        { \"playerName\": \"FI***316\", \"playerId\": \"FIB+zawrrbt3+316\" },\n        { \"playerName\": \"FI***774\", \"playerId\": \"FIB+jktjn0sv+774\" },\n        { \"playerName\": \"FI***694\", \"playerId\": \"FIB+46e4dpny+694\" },\n        { \"playerName\": \"FI***379\", \"playerId\": \"FIB+5ep4dn0f+379\" },\n        { \"playerName\": \"FI***572\", \"playerId\": \"FIB+gx2mx1ht+572\" },\n        { \"playerName\": \"FI***796\", \"playerId\": \"FIB+y22wf574+796\" },\n        { \"playerName\": \"FI***302\", \"playerId\": \"FIB+r4djmzdh+302\" },\n        { \"playerName\": \"FI***608\", \"playerId\": \"FIB+bngiy95v+608\" },\n        { \"playerName\": \"FI***171\", \"playerId\": \"FIB+68j8warj+171\" }\n    ],\n    \"liveGameId\": 4112336109,\n    \"action\": 11\n    }\n  ```\n\n### GET_BALANCE (action: 12)\n\n- **描述**: 提醒前端發送 get balance 請求\n- **範例**:\n\n  ```json\n  { \"liveGameId\": 4112336109, \"action\": 12 }\n  ```\n\n### DRAWING (action: 14)\n\n- **描述**: 火箭進度\n  - `(currentSecond)` 當前經過的秒數\n  - `(odds)` 當前賠率\n- **範例**:\n\n  ```json\n  { \"currentSecond\": 5.6, \"odds\": 3.54, \"liveGameId\": 4112336109, \"action\": 14 }\n  ```\n\n### CASH_OUT (action: 15)\n\n- **描述**: 在 DRAWING 階段時會不定時發送\n  - `(onBoards)` 目前仍在船上人數，\n  - `(othersCashOut)` 最近 12 個 cashout 的玩家，最高長度為 12，\n  - `(oddsCount)` 與上次收到該訊息時的資料相比，新跳出的玩家賠率及人數統計\n- **範例**:\n\n  ```json\n  {\n    \"onBoards\": 13,\n    \"othersCashOut\": [\n      {\n        \"playerName\": \"FI***353\",\n        \"playerId\": \"FIB+nyjxfmvn+353\",\n        \"odds\": 1.95\n      },\n      {\n        \"playerName\": \"FI***131\",\n        \"playerId\": \"FIB+7qnxt9cr+131\",\n        \"odds\": 1.86\n      },\n      {\n        \"playerName\": \"FI***664\",\n        \"playerId\": \"FIB+fxx18wrx+664\",\n        \"odds\": 1.86\n      },\n      {\n        \"playerName\": \"FI***428\",\n        \"playerId\": \"FIB+6h9xsdqu+428\",\n        \"odds\": 1.35\n      },\n      {\n        \"playerName\": \"FI***171\",\n        \"playerId\": \"FIB+sey7uyoo+171\",\n        \"odds\": 1.35\n      },\n      {\n        \"playerName\": \"FI***821\",\n        \"playerId\": \"FIB+jdrniwq1+821\",\n        \"odds\": 1.35\n      },\n      {\n        \"playerName\": \"FI***679\",\n        \"playerId\": \"FIB+p5i5mi0u+679\",\n        \"odds\": 1.12\n      },\n      {\n        \"playerName\": \"FI***303\",\n        \"playerId\": \"FIB+yecn8s7t+303\",\n        \"odds\": 0.0\n      },\n      {\n        \"playerName\": \"FI***208\",\n        \"playerId\": \"FIB+7oz615ev+208\",\n        \"odds\": 0.0\n      },\n      {\n        \"playerName\": \"FI***671\",\n        \"playerId\": \"FIB+uaw3ay98+671\",\n        \"odds\": 0.0\n      },\n      {\n        \"playerName\": \"FI***831\",\n        \"playerId\": \"FIB+3mxkhb7f+831\",\n        \"odds\": 0.0\n      },\n      {\n        \"playerName\": \"FI***913\",\n        \"playerId\": \"FIB+fipcmie9+913\",\n        \"odds\": 0.0\n      }\n    ],\n    \"oddsCount\": [\n      { \"odds\": 1.95, \"count\": 1 },\n      { \"odds\": 1.86, \"count\": 2 }\n    ],\n    \"liveGameId\": 4112336109,\n    \"action\": 15\n  }\n  ```\n",
+        "parameters": [
+          {
+            "name": "wsToken",
+            "in": "query",
+            "description": "Bearer token for WebSocket authentication, you can get it from the game info api.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "101": {
+            "description": "Switching Protocols - WebSocket connection established"
+          }
+        },
+        "servers": [
+          {
+            "url": "wss://fs7vsd7tav.highplayfky.com"
+          }
+        ]
+      }
+    },
+    "/api/common/consumeplayer": {
+      "post": {
+        "tags": [
+          "ConsumePlayer"
+        ],
+        "summary": "Consume player session",
+        "description": "Call external backend to consume player session using a session token.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "sessionToken"
+                ],
+                "type": "object",
+                "properties": {
+                  "sessionToken": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "returnCode": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "authToken": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiGameInfo": {
+        "type": "object",
+        "properties": {
+          "bettingCountDown": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "liveGameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gameStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "nextRoundTime": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "socketUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "socketToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "gameManagerId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BetAbstractDetail": {
+        "type": "object",
+        "properties": {
+          "orderTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "refNo": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "winLose": {
+            "type": "number",
+            "format": "double"
+          },
+          "payout": {
+            "type": "number",
+            "format": "double"
+          },
+          "stake": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BetAbstractDetailPagedResult": {
+        "type": "object",
+        "properties": {
+          "currentPage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "betCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalStake": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalPayout": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalWinlose": {
+            "type": "number",
+            "format": "double"
+          },
+          "betList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BetAbstractDetail"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BetDetailResponse": {
+        "type": "object",
+        "properties": {
+          "refNo": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stake": {
+            "type": "number",
+            "format": "double"
+          },
+          "winLose": {
+            "type": "number",
+            "format": "double"
+          },
+          "payout": {
+            "type": "number",
+            "format": "double"
+          },
+          "winningOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CashOrCrashOddsDetail"
+            },
+            "nullable": true
+          },
+          "orderDetail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CashOrCrashPlaceOrderDetail"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BetListRequest": {
+        "required": [
+          "endTime",
+          "startTime"
+        ],
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentPage": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CashOrCrashOddsDetail": {
+        "type": "object",
+        "properties": {
+          "betOption": {
+            "type": "string",
+            "nullable": true
+          },
+          "odds": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CashOrCrashPlaceOrderDetail": {
+        "type": "object",
+        "properties": {
+          "betOption": {
+            "type": "string",
+            "nullable": true
+          },
+          "odds": {
+            "type": "number",
+            "format": "double"
+          },
+          "stake": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CashOutRequest": {
+        "type": "object",
+        "properties": {
+          "liveGameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "refNo": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CashOutResponse": {
+        "type": "object",
+        "properties": {
+          "refNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "odds": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GameInfoGameDetail": {
+        "type": "object",
+        "properties": {
+          "currentGame": {
+            "$ref": "#/components/schemas/ApiGameInfo"
+          },
+          "gameHistory": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GameInfoPlayerDetail": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "loginName": {
+            "type": "string",
+            "nullable": true
+          },
+          "playerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "chips": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "tableLimit": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PresentBetOptionTableLimitDetail"
+            },
+            "nullable": true
+          },
+          "defaultChip": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxBet": {
+            "type": "number",
+            "format": "double"
+          },
+          "minBet": {
+            "type": "number",
+            "format": "double"
+          },
+          "balance": {
+            "type": "number",
+            "format": "double"
+          },
+          "voucherInfo": {
+            "$ref": "#/components/schemas/VoucherSummary"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GameInfoRequest": {
+        "type": "object",
+        "properties": {
+          "tableLimitId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GameInfoResponse": {
+        "type": "object",
+        "properties": {
+          "playerInfo": {
+            "$ref": "#/components/schemas/GameInfoPlayerDetail"
+          },
+          "gameInfo": {
+            "$ref": "#/components/schemas/GameInfoGameDetail"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetBalanceResponse": {
+        "type": "object",
+        "properties": {
+          "balance": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PlaceOrderRequest": {
+        "required": [
+          "betOptions",
+          "liveGameId"
+        ],
+        "type": "object",
+        "properties": {
+          "betOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PresentPlaceOrderDetail"
+            }
+          },
+          "liveGameId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "voucherId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PlaceOrderResponse": {
+        "type": "object",
+        "properties": {
+          "refNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "balance": {
+            "type": "number",
+            "format": "double"
+          },
+          "voucherInfo": {
+            "$ref": "#/components/schemas/VoucherSummary"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PresentBetOptionTableLimitDetail": {
+        "type": "object",
+        "properties": {
+          "betOption": {
+            "type": "string",
+            "nullable": true
+          },
+          "betOptionMin": {
+            "type": "number",
+            "format": "double"
+          },
+          "betOptionMax": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PresentPlaceOrderDetail": {
+        "required": [
+          "betOption",
+          "stake"
+        ],
+        "type": "object",
+        "properties": {
+          "betOption": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "stake": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "VoucherSummary": {
+        "type": "object",
+        "properties": {
+          "voucherId": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "fixedStake": {
+            "type": "number",
+            "format": "double"
+          },
+          "expireDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "Enter Authorization token **_only_**",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": []
+    }
+  ]
+}
