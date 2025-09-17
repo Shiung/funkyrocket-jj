@@ -29,7 +29,7 @@ export class Common<SecurityDataType = unknown> {
    * @request POST:/api/common/consumeplayer
    * @secure
    */
-  commonConsumeplayerCreate = (
+  consumeplayerCreate = (
     data: CommonConsumeplayerCreatePayload,
     params: RequestParams = {},
   ) =>

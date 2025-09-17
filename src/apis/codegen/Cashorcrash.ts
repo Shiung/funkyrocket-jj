@@ -41,7 +41,7 @@ export class Cashorcrash<SecurityDataType = unknown> {
    * @request GET:/api/cashorcrash/player/betdetail
    * @secure
    */
-  cashorcrashPlayerBetdetailList = (
+  playerBetdetailList = (
     query: CashorcrashPlayerBetdetailListParams,
     params: RequestParams = {},
   ) =>
@@ -61,10 +61,7 @@ export class Cashorcrash<SecurityDataType = unknown> {
    * @request POST:/api/cashorcrash/player/betlist
    * @secure
    */
-  cashorcrashPlayerBetlistCreate = (
-    data: BetListRequest,
-    params: RequestParams = {},
-  ) =>
+  playerBetlistCreate = (data: BetListRequest, params: RequestParams = {}) =>
     this.http.request<BetAbstractDetailPagedResult, any>({
       path: `/api/cashorcrash/player/betlist`,
       method: "POST",
@@ -82,7 +79,7 @@ export class Cashorcrash<SecurityDataType = unknown> {
    * @request GET:/api/cashorcrash/operator/betdetail
    * @secure
    */
-  cashorcrashOperatorBetdetailList = (
+  operatorBetdetailList = (
     query: CashorcrashOperatorBetdetailListParams,
     params: RequestParams = {},
   ) =>
@@ -102,10 +99,7 @@ export class Cashorcrash<SecurityDataType = unknown> {
    * @request POST:/api/cashorcrash/CashOut
    * @secure
    */
-  cashorcrashCashOutCreate = (
-    data: CashOutRequest,
-    params: RequestParams = {},
-  ) =>
+  cashOutCreate = (data: CashOutRequest, params: RequestParams = {}) =>
     this.http.request<CashOutResponse, any>({
       path: `/api/cashorcrash/CashOut`,
       method: "POST",
@@ -123,10 +117,7 @@ export class Cashorcrash<SecurityDataType = unknown> {
    * @request POST:/api/cashorcrash/GameInfo
    * @secure
    */
-  cashorcrashGameInfoCreate = (
-    data: GameInfoRequest,
-    params: RequestParams = {},
-  ) =>
+  gameInfoCreate = (data: GameInfoRequest, params: RequestParams = {}) =>
     this.http.request<GameInfoResponse, any>({
       path: `/api/cashorcrash/GameInfo`,
       method: "POST",
@@ -144,7 +135,7 @@ export class Cashorcrash<SecurityDataType = unknown> {
    * @request GET:/api/cashorcrash/GetBalance
    * @secure
    */
-  cashorcrashGetBalanceList = (params: RequestParams = {}) =>
+  getBalanceList = (params: RequestParams = {}) =>
     this.http.request<GetBalanceResponse, any>({
       path: `/api/cashorcrash/GetBalance`,
       method: "GET",
@@ -160,10 +151,7 @@ export class Cashorcrash<SecurityDataType = unknown> {
    * @request POST:/api/cashorcrash/PlaceOrder
    * @secure
    */
-  cashorcrashPlaceOrderCreate = (
-    data: PlaceOrderRequest,
-    params: RequestParams = {},
-  ) =>
+  placeOrderCreate = (data: PlaceOrderRequest, params: RequestParams = {}) =>
     this.http.request<PlaceOrderResponse, any>({
       path: `/api/cashorcrash/PlaceOrder`,
       method: "POST",

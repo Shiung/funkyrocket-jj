@@ -6,12 +6,13 @@ import axios from 'axios'
 import path from 'path'
 import { generateApi } from 'swagger-typescript-api'
 
+const apisDir = './src/apis'
 // 远程 Swagger API 文档的 URL
 const swaggerUrl = 'https://gate.ljbdev.site/api/cashorcrash/swagger/v1/swagger.json'
 // 输出的类型定义目录
-const outputDir = './src/apis/codegen'
+const outputDir = `${apisDir}/codegen`
 // Swagger JSON 文件的本地路径
-const swaggerJsonPath = `${outputDir}/swagger.json`
+const swaggerJsonPath = `${apisDir}/swagger.json`
 // api gen 模主 替換樣板的本地路径
 const templateDir = './scripts/generate-api-client/templates'
 
@@ -33,6 +34,7 @@ async function generateApiTypesBySwaggerTypescriptApi() {
       name: 'api.ts', // 输出的文件名
       input: path.resolve(process.cwd(), swaggerJsonPath), // 输入 Swagger JSON 文件路径
       output: path.resolve(process.cwd(), outputDir), // 输出目录
+      cleanOutput: true, // generate 前 清除資料夾
       httpClientType: 'axios', // 使用 axios 作为 HTTP 客户端
       modular: true, // 启用模块化生成
       singleHttpClient: true, // 启用单一 httpClient 实例
