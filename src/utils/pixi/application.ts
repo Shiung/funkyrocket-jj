@@ -1,7 +1,7 @@
 /**
  * PixiJS 應用程式相關工具函數
  */
-import * as PIXI from 'pixi.js'
+import { Application, RendererType } from 'pixi.js'
 import { initDevtools } from '@pixi/devtools'
 import { checkRendererSupport, logRendererInfo } from './renderer'
 
@@ -16,7 +16,7 @@ export interface AppConfig {
 }
 
 export interface CreateAppResult {
-  app: PIXI.Application
+  app: Application
   rendererInfo: {
     type: number
     typeName: string
@@ -52,7 +52,7 @@ export async function createPixiApp(config: AppConfig): Promise<CreateAppResult>
   log(`WebGPU 適配器: ${rendererSupport.webgpuAdapter ? '可用' : '不可用'}`)
 
   // 創建應用
-  const app = new PIXI.Application()
+  const app = new Application()
   await app.init({
     canvas,
     width, // 邏輯寬
@@ -76,8 +76,8 @@ export async function createPixiApp(config: AppConfig): Promise<CreateAppResult>
 
   // 獲取渲染器詳細信息
   const rendererTypes = {
-    [PIXI.RendererType.WEBGL]: 'WebGL',
-    [PIXI.RendererType.WEBGPU]: 'WebGPU',
+    [RendererType.WEBGL]: 'WebGL',
+    [RendererType.WEBGPU]: 'WebGPU',
   } as const
 
   const rendererInfo = {
@@ -86,8 +86,8 @@ export async function createPixiApp(config: AppConfig): Promise<CreateAppResult>
       rendererTypes[app.renderer.type as keyof typeof rendererTypes] ||
       `未知類型(${app.renderer.type})`,
     name: app.renderer.name,
-    isWebGPU: app.renderer.type === PIXI.RendererType.WEBGPU,
-    isWebGL: app.renderer.type === PIXI.RendererType.WEBGL,
+    isWebGPU: app.renderer.type === RendererType.WEBGPU,
+    isWebGL: app.renderer.type === RendererType.WEBGL,
   }
 
   // 初始化開發者工具
@@ -102,7 +102,7 @@ export async function createPixiApp(config: AppConfig): Promise<CreateAppResult>
  * 安全銷毀 PixiJS 應用
  */
 export function destroyPixiApp(
-  app: PIXI.Application | null,
+  app: Application | null,
   logger?: (message: string) => void,
 ): void {
   const log = logger || console.log

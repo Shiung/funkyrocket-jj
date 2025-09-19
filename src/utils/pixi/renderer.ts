@@ -1,7 +1,7 @@
 /**
  * PixiJS 渲染器相關工具函數
  */
-import * as PIXI from 'pixi.js'
+import { RendererType, VERSION, type Renderer} from 'pixi.js'
 
 export interface RendererInfo {
   hasWebGL: boolean
@@ -49,10 +49,10 @@ export async function checkRendererSupport(): Promise<RendererInfo> {
 /**
  * 獲取渲染器詳細信息
  */
-export function getRendererDetails(renderer: PIXI.Renderer): RendererDetails {
+export function getRendererDetails(renderer: Renderer): RendererDetails {
   const rendererTypes = {
-    [PIXI.RendererType.WEBGL]: 'WebGL', 
-    [PIXI.RendererType.WEBGPU]: 'WebGPU',
+    [RendererType.WEBGL]: 'WebGL', 
+    [RendererType.WEBGPU]: 'WebGPU',
   }
   
   const typeName = rendererTypes[renderer.type as keyof typeof rendererTypes] || `未知類型(${renderer.type})`
@@ -61,27 +61,27 @@ export function getRendererDetails(renderer: PIXI.Renderer): RendererDetails {
     type: renderer.type,
     typeName,
     name: renderer.name,
-    isWebGPU: renderer.type === PIXI.RendererType.WEBGPU,
-    isWebGL: renderer.type === PIXI.RendererType.WEBGL
+    isWebGPU: renderer.type === RendererType.WEBGPU,
+    isWebGL: renderer.type === RendererType.WEBGL
   }
 }
 
 /**
  * 記錄渲染器信息
  */
-export function logRendererInfo(renderer: PIXI.Renderer, logger?: (message: string) => void) {
+export function logRendererInfo(renderer: Renderer, logger?: (message: string) => void) {
   const log = logger || console.log
   const details = getRendererDetails(renderer)
   
-  log(`PIXI 版本: ${PIXI.VERSION}`)
+  log(`PIXI 版本: ${VERSION}`)
   log(`渲染器類型代碼: ${details.type}`)
   log(`渲染器名稱: ${details.name}`)
   log(`渲染器類型: ${details.typeName}`)
   
   // 檢查 PIXI 渲染器類型常量
   log('PIXI 渲染器類型常量:')
-  log(`- WEBGL: ${PIXI.RendererType.WEBGL}`)
-  log(`- WEBGPU: ${PIXI.RendererType.WEBGPU}`)
+  log(`- WEBGL: ${RendererType.WEBGL}`)
+  log(`- WEBGPU: ${RendererType.WEBGPU}`)
   
   if (details.isWebGPU) {
     log('🚀 使用最新的 WebGPU 渲染器！')

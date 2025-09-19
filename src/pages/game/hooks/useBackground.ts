@@ -1,7 +1,5 @@
 import { ref, computed } from 'vue'
-import type { Sprite } from 'pixi.js'
-import { Assets } from 'pixi.js'
-import * as PIXI from 'pixi.js'
+import { Assets, Sprite } from 'pixi.js'
 import { createLogger } from '@/utils/pixi/logger'
 import { useBaseConfig } from './useBaseConfig'
 
@@ -57,7 +55,7 @@ export const useBackground = (getApp: () => any) => {
       logger.info(`🖼️ 載入默認背景`)
       
       const texture = await Assets.load(defaultBackground.value)
-      defaultBackgroundSprite = new PIXI.Sprite(texture)
+      defaultBackgroundSprite = new Sprite(texture)
       
       // 設置背景尺寸以適應畫布，保持比例
       const scaleX = gameWidth.value / texture.width
@@ -168,7 +166,7 @@ export const useBackground = (getApp: () => any) => {
         app.stage.removeChild(frontCloudSprite)
       }
       
-      frontCloudSprite = new PIXI.Sprite(texture)
+      frontCloudSprite = new Sprite(texture)
       
       // 更新雲朵縮放
       updateFrontCloudScale()
@@ -207,7 +205,7 @@ export const useBackground = (getApp: () => any) => {
       }
       
       for (let i = 0; i < spriteCount; i++) {
-        const sprite = new PIXI.Sprite(texture)
+        const sprite = new Sprite(texture)
         sprite.scale.set(scale)
         sprite.x = 0
         
