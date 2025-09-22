@@ -1,18 +1,26 @@
 import wsObservables from './wsObservables'
 import type { WebSocketOptions } from './types'
-
-// const _checkIsConnect
+import { debugMessage, jsonParse, bindUrl } from './utils'
 
 export class wsBase {
   private ws: WebSocket | null = null
-  private readonly options: WebSocketOptions
-  private _wsDebug = sessionStorage.getItem('omg') === 'true' || false
+  private readonly options: WebSocketOptions  
+  private _wsDebug = true // sessionStorage.getItem('omg') === 'true' || false
+
+  /** reconnect process */
+  private reconnectIng: boolean = false
+
+  /** 已重複連線次數 */
+  private reconnectCount: number = 0
+
+  /** 終止ws連線 */
+  private endOfWs: boolean = false
 
   private observableInstance = wsObservables
   /** ws 可以正常交握 */
   private enabled: boolean = false
 
-  /** reconnect timer */
+  /** timer 容器 */
   private timer: {
     reconnet: ReturnType<typeof setTimeout> | null
     heartbeat: ReturnType<typeof setTimeout> | null
@@ -33,43 +41,81 @@ export class wsBase {
   /** 建立連線 */
   public connect() {
     if ([WebSocket.CONNECTING, WebSocket.OPEN].some((status) => status === this.ws?.readyState)) return
-    // const url = new URL(this.url)
-    this.ws = new WebSocket(this.options.url)
+    
+    const connectUrl = bindUrl(this.options.url ?? '', this.options.params)
+    if (!connectUrl) return
+    this.ws = new WebSocket(connectUrl)
 
     this.ws.onopen = (event) => {
-      console.log('😱 onopen', event)
+      debugMessage({ type: 'system', title: '😱 onopen', msg: event, isDebug: this._wsDebug })
       this.enabled = true
+      this.reconnectCount = 0
+      this.reconnectIng = false
     }
 
     this.ws.onmessage = (event) => {
-      console.log('😱 onmessage', event, JSON.parse(event.data))
-      this.obserableNotify(JSON.parse(event.data))
+      const resData = jsonParse(event.data)
+      debugMessage({ type: 'system', title: '😱 onmessage', msg: resData, isDebug: this._wsDebug })
+      this.obserableNotify(resData)
     }
 
     this.ws.onerror = (event) => {
-      console.log('😱 onerror', event)
-
+      debugMessage({ type: 'system', title: '😱 onerror', msg: event, isDebug: this._wsDebug })
     }
 
     this.ws.onclose = (event) => {
-      console.log('😱 onclose', event)
+      this.reconnectIng = false
+      debugMessage({ type: 'system', title: '😱 onclose', msg: event, isDebug: this._wsDebug })
+      
+      if (event.code === 1000 || this.endOfWs) {
+        // 使用者發起的關閉
+        return
+      }
+
+      debugMessage({ type: 'info', title: 'reconnect', msg: '', isDebug: true })
+      this.reconnect()
     }
   }
 
-  private reconnect(): void {
+  /** reconnect socket */
+  private async reconnect() {
+    const maxReAttemp = this.options.reconnectAttempts || 5
+    const reconnectTimeout = this.options.reconnectTimeout || 3000
 
+    if (this.reconnectIng || this.reconnectCount > maxReAttemp) return // 終止重新連線
+    
+    this.reconnectIng = true
+
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      debugMessage({ type: 'info', title: 'reconnect', msg: 'close', isDebug: true })
+      await this.close(1006)
+    }
+    debugMessage({ type: 'info', title: 'reconnect', msg: 'close out', isDebug: true })
+    if (this.reconnectCount > 0) {
+      await new Promise((resolve) => {
+        this.timer.reconnet = setTimeout(() => resolve(true), reconnectTimeout)
+      })
+    }
+    debugMessage({ type: 'info', title: 'reconnect', msg: 'connect', isDebug: true })
+    this.cleanup()
+    this.reconnectCount++
+    this.connect()
   }
 
   /** close socket */
-  public async close(): Promise<void> {
+  public async close(status: number = 1000): Promise<void> {
     if (!this.ws || [WebSocket.CLOSING, WebSocket.CLOSED].some(status => status === this.ws?.readyState)) {
       return Promise.resolve()
     }
 
     /** 使用者手動關閉行為 status 1000 */
-    this.ws.close(1000, 'user close')
+    if (status === 1000) {
+      this.endOfWs = true
+      this.ws.close(1000, 'user close')
+    } else {
+      this.ws.close()
+    }
     await this.waitingSocketClosed()
-
     this.cleanup()
   }
 
@@ -83,20 +129,18 @@ export class wsBase {
     }
   }
 
-  // private heartbeatRoop() {
-  //   const heartBeatFn = () => {
-  //     this.ws
-  //   }
-  //   this.timer.heartbeat = setInterval(() => {
-  //     if (this.ws?.readyState !== WebSocket.OPEN) return
+  /** 更新連線 URL */
+  public setUrl(newUrl: WebSocketOptions['url']) {
+    if (this.options.url === newUrl) return
+    this.options.url = newUrl
+  }
 
-  //     if (this.options.heartbeatFunc) {
-  //       this.options.heartbeatFunc()
-  //     } else {
-  //       this.send(this.options.heartbeatMessage)
-  //     }
-  //   }, this.options.heartbeatInterval)
-  // }
+  /** 更新連線 params */
+  public setParams(p: WebSocketOptions['params']) {
+    this.options.params = p
+  }
+
+  // TODO heatbeat
 
   /** 用 promise 等待確認ws是否已經正常關閉 */
   private async waitingSocketClosed() {

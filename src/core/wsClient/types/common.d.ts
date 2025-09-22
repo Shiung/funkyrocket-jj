@@ -1,5 +1,6 @@
 export interface WebSocketOptions {
-  url: string
+  url?: string
+  params?: Record<string, string>
   heartbeatTimeout?: number
   heartbeatMessage?: string | object
   heartbeatFunc?: (() => void) | null
