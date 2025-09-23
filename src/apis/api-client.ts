@@ -22,7 +22,7 @@ export const apiClient = new HttpClient<SecurityDataType>({
     if (securityData && securityData.token) {
       return {
         headers: {
-          Authorization: `Bearer ${securityData.token}`,
+          Authorization: securityData.token,
         },
       }
     }
