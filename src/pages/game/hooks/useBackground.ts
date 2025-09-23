@@ -10,10 +10,13 @@ export const useBackground = (getApp: () => any) => {
   const {
     gameWidth,
     gameHeight,
+    horizon,
     MIN_GAME_WIDTH,
     MAX_GAME_WIDTH,
+    FRONT_TOP_TO_HORIZON,
     baseOffsetY,
-    isDesktop
+    scaleFactorY,
+    isDesktop,
   } = useBaseConfig()
   // 背景精靈實例
   let defaultBackgroundSprite: Sprite | null = null
@@ -85,18 +88,15 @@ export const useBackground = (getApp: () => any) => {
 
     // 設置雲朵寬度填滿螢幕，但限制高度最多到螢幕一半
     const scale = gameWidth.value / texture.width
-    const scaledHeight = texture.height * scale
-    const maxHeight = gameHeight.value * 0.5  // 最多螢幕一半高度
     
     // 寬度始終填滿螢幕
     frontCloudSprite.width = gameWidth.value
     frontCloudSprite.x = 0
-    
-    // 高度限制在螢幕一半
-    frontCloudSprite.height = Math.min(scaledHeight, maxHeight)
-    
-    // 靠下對齊 - 放在畫面底部
     frontCloudSprite.y = gameHeight.value / 2 + baseOffsetY.value
+    frontCloudSprite.scale.set(scale)
+
+    horizon.value = frontCloudSprite.y - (FRONT_TOP_TO_HORIZON * scaleFactorY.value)
+    
     frontCloudSprite.zIndex = 0 // 在背景上、火箭下
   }
 
@@ -132,6 +132,8 @@ export const useBackground = (getApp: () => any) => {
       const scaledWidth = texture.width * finalScale
       frontCloudSprite.x = Math.floor((gameWidth.value - scaledWidth) / 2)  // 置中對齊
       frontCloudSprite.y = gameHeight.value / 2 + baseOffsetY.value
+
+      horizon.value = frontCloudSprite.y - (FRONT_TOP_TO_HORIZON * scaleFactorY.value)
       
       console.log(`375基準縮放模式 - 螢幕寬度: ${gameWidth.value}px, 縮放係數: ${scaleFactor.toFixed(3)}, 最終縮放: ${finalScale.toFixed(3)}, 雲朵寬度: ${scaledWidth.toFixed(0)}px`)
       

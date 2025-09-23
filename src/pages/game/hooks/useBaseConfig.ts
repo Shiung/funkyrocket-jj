@@ -2,14 +2,21 @@ import { ref, computed } from 'vue'
 
 // 設計基準尺寸 (設計稿的原始尺寸)
 const DESIGN_WIDTH = 750
+const DESIGN_MAX_WIDTH = 900
 const DESIGN_HEIGHT = 1624
 
 const MIN_GAME_WIDTH = 375
 const MAX_GAME_WIDTH = 450
 
+// 前景圖最上方到水平線的距離，UI是給75.51px，先抓76
+const FRONT_TOP_TO_HORIZON = 76
+
 // 全局共享的遊戲尺寸 - 保持比例，高度跟 body 一樣
 const gameWidth = ref(DESIGN_WIDTH)
 const gameHeight = ref(DESIGN_HEIGHT)
+
+// 水平線高度
+const horizon = ref(gameHeight.value / 4 - FRONT_TOP_TO_HORIZON)
 
 // 裝置類型判斷 - 基於寬度
 const judgeDeviceType = () => {
@@ -69,10 +76,13 @@ export const useBaseConfig = () => {
     // 遊戲尺寸
     gameWidth,
     gameHeight,
+    horizon,
     
     // 設計基準尺寸
     DESIGN_WIDTH,
+    DESIGN_MAX_WIDTH,
     DESIGN_HEIGHT,
+    FRONT_TOP_TO_HORIZON,
 
     // 遊戲尺寸範圍
     MIN_GAME_WIDTH,

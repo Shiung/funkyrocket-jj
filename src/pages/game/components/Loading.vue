@@ -26,7 +26,7 @@ function handleCloseClick() {
 </script>
 
 <template>
-  <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-90" :style="genMainStyle">
+  <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-90 z-50" :style="genMainStyle">
     <div class="h-full w-full flex flex-col gap-3 items-center justify-center">
       <img src="/assets/loading/loading.webp" alt="loading" class="w-[9.5rem] h-[11.25rem]" />
       <div class="text-white text-base">游戏载入中...</div>
