@@ -2,10 +2,19 @@ import wsObservables from './wsObservables'
 import type { WebSocketOptions } from './types'
 import { debugMessage, jsonParse, bindUrl } from './utils'
 
+const _defaultOption = {
+  heartbeatTimeout: 1000 * 10, // 预设心跳间隔 10 秒
+  heartbeatMessage: 'ping', // 预设心跳讯息
+  heartbeatFunc: null, // 心跳函式 如果有设定 在只使用这个函式 不使用预设心跳讯息
+  reconnectAttempts: 5, // 预设重试 5 次
+  reconnectTimeout: 3000,
+  genObservekey: (v: string) => {return `${v}`},
+}
+
 export class wsBase {
   private ws: WebSocket | null = null
   private readonly options: WebSocketOptions  
-  private _wsDebug = true // sessionStorage.getItem('omg') === 'true' || false
+  private _wsDebug = sessionStorage.getItem('omg') === 'true' || false
 
   /** reconnect process */
   private reconnectIng: boolean = false
@@ -28,12 +37,7 @@ export class wsBase {
 
   constructor(options: WebSocketOptions) {
     this.options = {
-      heartbeatTimeout: 1000 * 10, // 预设心跳间隔 10 秒
-      heartbeatMessage: 'ping', // 预设心跳讯息
-      heartbeatFunc: null, // 心跳函式 如果有设定 在只使用这个函式 不使用预设心跳讯息
-      reconnectAttempts: 5, // 预设重试 5 次
-      reconnectTimeout: 3000,
-      genObservekey: (v) => {return `${v}`},
+      ..._defaultOption,
       ...options
     }
   }
@@ -51,6 +55,7 @@ export class wsBase {
       this.enabled = true
       this.reconnectCount = 0
       this.reconnectIng = false
+      this.endOfWs = false
     }
 
     this.ws.onmessage = (event) => {
@@ -72,31 +77,30 @@ export class wsBase {
         return
       }
 
-      debugMessage({ type: 'info', title: 'reconnect', msg: '', isDebug: true })
+      debugMessage({ type: 'info', title: 'reconnect', msg: 'reconnect action', isDebug: this._wsDebug })
       this.reconnect()
     }
   }
 
   /** reconnect socket */
   private async reconnect() {
-    const maxReAttemp = this.options.reconnectAttempts || 5
-    const reconnectTimeout = this.options.reconnectTimeout || 3000
+    const maxReAttemp = this.options.reconnectAttempts || _defaultOption.reconnectAttempts
+    const reconnectTimeout = this.options.reconnectTimeout || _defaultOption.reconnectTimeout
 
     if (this.reconnectIng || this.reconnectCount > maxReAttemp) return // 終止重新連線
     
     this.reconnectIng = true
 
     if (this.ws?.readyState === WebSocket.OPEN) {
-      debugMessage({ type: 'info', title: 'reconnect', msg: 'close', isDebug: true })
+      debugMessage({ type: 'info', title: 'reconnect', msg: 'old socket close', isDebug: this._wsDebug })
       await this.close(1006)
     }
-    debugMessage({ type: 'info', title: 'reconnect', msg: 'close out', isDebug: true })
     if (this.reconnectCount > 0) {
       await new Promise((resolve) => {
         this.timer.reconnet = setTimeout(() => resolve(true), reconnectTimeout)
       })
     }
-    debugMessage({ type: 'info', title: 'reconnect', msg: 'connect', isDebug: true })
+    debugMessage({ type: 'info', title: 'reconnect', msg: 'connect process', isDebug: this._wsDebug })
     this.cleanup()
     this.reconnectCount++
     this.connect()

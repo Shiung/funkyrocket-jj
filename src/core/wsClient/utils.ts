@@ -1,3 +1,5 @@
+import type { WebSocketOptions } from './types'
+
 type DebugMsg = {
   type: 'system' | 'info'
   title: string
