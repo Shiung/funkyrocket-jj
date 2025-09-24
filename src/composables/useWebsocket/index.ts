@@ -1,6 +1,8 @@
 import createWebsocket from '@/core/wsClient'
 import { ActionType, type MessageMap } from '@/core/wsClient/types/message'
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, watchEffect } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { storeToRefs } from 'pinia'
 
 const genObservekey = (data = {}) => {
   return `action_${'action' in data ? data.action : 'other'}`
@@ -9,7 +11,6 @@ const genObservekey = (data = {}) => {
 const ws = createWebsocket({
   genObservekey
 })
-
 declare global {
   interface Window {
     /** instance debug */
@@ -17,7 +18,11 @@ declare global {
   }
 }
 
+window._ws = ws
+
 export default function useWebsocket() {
+  const { wsInfo } = storeToRefs(useUserStore())
+
   const subscribe_drawing = ws.subscribe({ action: ActionType.DRAWING }, (v) => {
     console.log(`v [${ActionType[ActionType.DRAWING]}] ===> `, v)
   })
@@ -27,24 +32,29 @@ export default function useWebsocket() {
   })
 
   const subscribe_openBet = ws.subscribe({ action: ActionType.OPEN_BET }, (m: MessageMap[ActionType.OPEN_BET]) => {
-    console.log('openBetScross', m)
+    console.log(`v [${ActionType[ActionType.OPEN_BET]}] ===> `, m)
   })
 
   const subscribe_syncTimer = ws.subscribe({ action: ActionType.SYNC_TIMER }, (m: MessageMap[ActionType.SYNC_TIMER]) => {
-    console.log('syncScross', m)
+    console.log(`v [${ActionType[ActionType.SYNC_TIMER]}] ===> `, m)
   })
 
-  const wsConnect = () => {
-    return
-    ws.setUrl('wss://dv8g9p7m1c2xqz5.highplayfky.com/gameChannels')
-    ws.setParams({ wsToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IkZ1bjk5NDM0NCRfQVMiLCJnYW1lTWFuYWdlclR5cGUiOiI2MDI4MTciLCJtYW5hZ2VySWQiOiJkZWZhdWx0IiwiZnBJZCI6IjE2ODAiLCJzZXNzaW9uSWQiOiJGdW45OTQzNDQkX0FTIiwibmJmIjoxNzU4NTk3Mzk1LCJleHAiOjE3NTg1OTc2OTUsImlhdCI6MTc1ODU5NzM5NX0.FKlmk_S3zSokaK5PWrl2NdctzwXZX3EZHSA9W724rRE' })
+  const wsConnect = async (url: string, token: string) => {
+    if (!url || !token) return
+    ws.setUrl(url)
+    ws.setParams({ wsToken: token })
+    await ws.close()
     ws.connect()
-
   }
 
+  watchEffect(() => {
+    console.log('wsInfo', wsInfo.value)
+    if (wsInfo.value.socketUrl && wsInfo.value.socketToken) {
+      wsConnect(wsInfo.value.socketUrl, wsInfo.value.socketToken)
+    }
+  })
+
   onMounted(() => {
-    wsConnect()
-    window._ws = ws
     console.log('useWebsocket init ')
   })
 
