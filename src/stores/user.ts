@@ -27,10 +27,12 @@ export const useUserStore = defineStore('user', () => {
 
   /** 重置 user authToken, gameInfo, playerInfo */
   const resetState = () => {
-    state.authToken = ''
-    state.gameInfo = undefined
-    state.playerInfo = undefined
-    state.unAuthorized = false
+    const reset = {
+      authToken: '',
+      gameInfo: undefined,
+      playerInfo: undefined,
+    }
+    Object.assign(state, reset)
   }
 
   const wsInfo = computed(() => {

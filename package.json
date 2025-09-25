@@ -23,6 +23,7 @@
     "@esotericsoftware/spine-pixi-v8": "^4.2.90",
     "@pixi/devtools": "^2.0.1",
     "axios": "^1.11.0",
+    "mitt": "^3.0.1",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.5.0",
     "pixi.js": "^8.12.0",
