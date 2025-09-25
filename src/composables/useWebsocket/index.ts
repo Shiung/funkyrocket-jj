@@ -8,8 +8,13 @@ const genObservekey = (data = {}) => {
   return `action_${'action' in data ? data.action : 'other'}`
 }
 
+const wsConnectFail = () => {
+  console.log('ws connect error')
+}
+
 const ws = createWebsocket({
-  genObservekey
+  genObservekey,
+  forbiddenCb: wsConnectFail
 })
 declare global {
   interface Window {
@@ -21,7 +26,7 @@ declare global {
 window._ws = ws
 
 export default function useWebsocket() {
-  const { wsInfo } = storeToRefs(useUserStore())
+  const { wsInfo, state } = storeToRefs(useUserStore())
 
   const subscribe_drawing = ws.subscribe({ action: ActionType.DRAWING }, (v) => {
     console.log(`v [${ActionType[ActionType.DRAWING]}] ===> `, v)
@@ -43,9 +48,16 @@ export default function useWebsocket() {
     if (!url || !token) return
     ws.setUrl(url)
     ws.setParams({ wsToken: token })
-    await ws.close()
+    await ws.close(1006)
     ws.connect()
   }
+
+  watchEffect(async () => {
+    if (state.value.unAuthorized) {
+      // 終止連線
+      await ws.close()
+    }
+  })
 
   watchEffect(() => {
     console.log('wsInfo', wsInfo.value)

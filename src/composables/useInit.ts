@@ -1,7 +1,7 @@
 import API from '@api/index'
 import { APIERROR } from '@/apis/config'
 import { setHeaderToken } from '@/apis/api-client'
-import { computed, onMounted, watch, watchEffect } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/user'
 import { useRoute, useRouter } from 'vue-router'
@@ -14,27 +14,28 @@ export default function useInit() {
 
   const routeQuery = computed(() => route.query)
 
-  watchEffect(() => {
-    if (routeQuery.value.token) {
-      userStore.setState('token', routeQuery.value.token.toString())
-    }
-  })
-
   const fetchHandler = async () => {
+    /** authtoken store 持久化如果有 如果有存在不call api consumeplayerCreate 只能請求一次 */
+    const authToken = state.value.authToken
     try {
       const sessionToken = state.value.token
-      const res = await API.common.consumeplayerCreate({ sessionToken })
-      if (res.data.returnCode === 1) throw Error(APIERROR[res.data.returnCode])
-      const hasToken = res.data.authToken
+      let hasToken = authToken
+      if (!hasToken) {
+        const res = await API.common.consumeplayerCreate({ sessionToken })
+        if (res.data.returnCode === 1) throw Error(APIERROR[res.data.returnCode])
+        hasToken = res.data.authToken ?? ''
+      }
       if (hasToken) {
         setHeaderToken(hasToken)
         userStore.setState('authToken', hasToken)
-      }
+      } else throw Error('without authtoken')
+
       const gameInfo = await API.cashorcrash.gameInfoCreate({})
       userStore.setState('gameInfo', gameInfo.data.gameInfo)
       userStore.setState('playerInfo', gameInfo.data.playerInfo)
     } catch (e) {
       console.warn('e ==>', e)
+      userStore.setState('unAuthorized', true)
     }
   }
 
@@ -50,8 +51,20 @@ export default function useInit() {
     pageRedirect()
   })
 
-  watch(() => state.value.token, (t) => {
+  watch(() => routeQuery.value.token, (query) => {
+    if (query) {
+      userStore.setState('token', query.toString())
+    }
+  }, {
+    immediate: true
+  })
+
+  watch(() => state.value.token, (t, prevToken) => {
     if (!t) return
+    // token change reset autoToken
+    if (prevToken) {
+      userStore.resetState()
+    }
     fetchHandler()
   })
 }
