@@ -8,15 +8,18 @@ const DESIGN_HEIGHT = 1624
 const MIN_GAME_WIDTH = 375
 const MAX_GAME_WIDTH = 450
 
-// 前景圖最上方到水平線的距離，UI是給75.51px，先抓76
-const FRONT_TOP_TO_HORIZON = 76
+// 水平線偏移量，因為圖片包含上面柵欄那些
+const HORIZON_OFFSET = 76
+// 畫面最下方到水平線的距離
+const BOTTOM_TO_HORIZON = {
+  default: 342,
+  compact: 248,
+  least: 188,
+}
 
 // 全局共享的遊戲尺寸 - 保持比例，高度跟 body 一樣
 const gameWidth = ref(DESIGN_WIDTH)
 const gameHeight = ref(DESIGN_HEIGHT)
-
-// 水平線高度
-const horizon = ref(gameHeight.value / 4 - FRONT_TOP_TO_HORIZON)
 
 // 裝置類型判斷 - 基於寬度
 const judgeDeviceType = () => {
@@ -36,6 +39,14 @@ const judgeDeviceType = () => {
 
 const isDesktop = ref(judgeDeviceType())
 
+// 是否為小螢幕
+const isCompact = computed(() => {
+  if (isDesktop.value) return false
+
+  return gameHeight.value <= 667
+})
+
+
 // 縮放因子
 const scaleFactorX = computed(() => gameWidth.value / DESIGN_WIDTH)
 const scaleFactorY = computed(() => gameHeight.value / DESIGN_HEIGHT)
@@ -46,29 +57,11 @@ const baseOffsetY = computed(() => -40 * scaleFactorY.value)
 // 基礎縮放，所有角色都會縮放這個值 (會根據縮放因子調整)
 const baseScale = computed(() => 0.85 * Math.min(scaleFactorX.value, scaleFactorY.value))
 
-// 計算手機模式下的背景偏移量
-const backgroundOffset = computed(() => {
-  if (isDesktop.value) {
-    // PC模式沒有偏移
-    return { offsetX: 0, offsetY: 0, scale: 1 }
-  }
-  
-  // 手機模式：基於設計尺寸計算偏移
-  const scaleX = gameWidth.value / DESIGN_WIDTH
-  const scaleY = gameHeight.value / DESIGN_HEIGHT
-  const scale = Math.max(scaleX, scaleY)
-  
-  // 背景的實際位置（置中對齊後的偏移）
-  const backgroundOffsetX = gameWidth.value <= MIN_GAME_WIDTH ? 0 : Math.floor((gameWidth.value - DESIGN_WIDTH * scale) / 2)
-  const backgroundOffsetY = gameWidth.value <= MIN_GAME_WIDTH ? 0 : Math.floor((gameHeight.value - DESIGN_HEIGHT * scale) / 2)
-  
-  console.log(`📊 背景偏移計算 - 螢幕: ${gameWidth.value}x${gameHeight.value}, 背景縮放: ${scale.toFixed(3)}, 偏移: (${backgroundOffsetX}, ${backgroundOffsetY})`)
-  
-  return { 
-    offsetX: backgroundOffsetX, 
-    offsetY: backgroundOffsetY,
-    scale: scale
-  }
+// 水平線高度
+const horizon = computed(() => {
+  if (isDesktop.value) return BOTTOM_TO_HORIZON.least
+
+  return isCompact.value ? BOTTOM_TO_HORIZON.compact : BOTTOM_TO_HORIZON.default
 })
 
 export const useBaseConfig = () => {
@@ -82,7 +75,7 @@ export const useBaseConfig = () => {
     DESIGN_WIDTH,
     DESIGN_MAX_WIDTH,
     DESIGN_HEIGHT,
-    FRONT_TOP_TO_HORIZON,
+    HORIZON_OFFSET,
 
     // 遊戲尺寸範圍
     MIN_GAME_WIDTH,
@@ -90,6 +83,7 @@ export const useBaseConfig = () => {
     
     // 裝置類型
     isDesktop,
+    isCompact,
     judgeDeviceType,
     
     // 縮放因子
@@ -99,6 +93,5 @@ export const useBaseConfig = () => {
     // 基礎配置
     baseOffsetY,
     baseScale,
-    backgroundOffset
   }
 }

@@ -183,23 +183,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useBaseConfig } from '../hooks/useBaseConfig'
-
-// 遊戲狀態枚舉
-enum GameState {
-  IDLE = 'IDLE',
-  BOARDING = 'BOARDING',
-  COUNTDOWN = 'COUNTDOWN',
-  LAUNCHING = 'LAUNCHING',
-  FLYING = 'FLYING',
-  DISEMBARKING = 'DISEMBARKING',
-  EXPLODING = 'EXPLODING',
-  COMPLETED = 'COMPLETED'
-}
-
-// 角色類型
-type CharacterType = 'player' | 'streamer' | 'npc'
+import { GameState, type CharacterType } from '../types'
 
 // Props
 interface Props {
@@ -239,13 +225,8 @@ const genMainStyle = computed(() => {
   }
 })
 
-watch(horizon, () => {
-  console.log('### change horizon', horizon.value)
-})
-
 // 容器高度 高度/2 - 上方把手高度 - 前景圖最上方到水平線的距離
 const genContainerStyle = computed(() => {
-  console.log('### horizon.value', horizon.value)
   return {
     height: horizon.value - 38 + 'px',
   }

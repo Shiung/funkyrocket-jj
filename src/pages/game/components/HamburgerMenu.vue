@@ -102,21 +102,7 @@
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useAudioStore } from '@/stores/audio'
-
-// 遊戲狀態枚舉
-enum GameState {
-  IDLE = 'IDLE',
-  BOARDING = 'BOARDING',
-  COUNTDOWN = 'COUNTDOWN',
-  LAUNCHING = 'LAUNCHING',
-  FLYING = 'FLYING',
-  DISEMBARKING = 'DISEMBARKING',
-  EXPLODING = 'EXPLODING',
-  COMPLETED = 'COMPLETED'
-}
-
-// 角色類型
-type CharacterType = 'player' | 'streamer' | 'npc'
+import { GameState, type CharacterType } from '../types'
 
 // Props
 interface Props {
