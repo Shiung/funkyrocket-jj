@@ -1,5 +1,5 @@
 import mitt from 'mitt'
-import { ActionType, type MessageMap } from '@/core/wsClient/types'
+import { ActionType, type MessageMap } from '@/core/wsClient/types/message'
 
 // global
 type Events = {
