@@ -24,7 +24,8 @@ import type {
   PlaceOrderRequest,
   PlaceOrderResponse,
 } from "./data-contracts";
-import type { ContentType, HttpClient, RequestParams } from "./http-client";
+import type { HttpClient, RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
 export class Cashorcrash<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;

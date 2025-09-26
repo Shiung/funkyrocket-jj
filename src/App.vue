@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { RouterView, useRouter } from 'vue-router'
+import { RouterView } from 'vue-router'
+import useInit from '@/composables/useInit'
 import useWebsocket from '@/composables/useWebsocket'
+import useEvent from '@/composables/useEvent'
 
-const router = useRouter()
-router.replace('/game')
-
+useInit()
+useEvent()
 useWebsocket()
 </script>
 
