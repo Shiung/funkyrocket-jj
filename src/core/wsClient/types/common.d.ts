@@ -8,6 +8,8 @@ export interface WebSocketOptions {
   reconnectTimeout?: number
   messageHandler?: (e: MessageEvent<any>, event: IWsMasterEvent) => void
   genObservekey?: ((s: any) => string | number)
+  /** ws forbidden callback */
+  forbiddenCb?: () => void
 }
 
 export type Listener = (arg: any) => void

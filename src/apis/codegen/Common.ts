@@ -11,7 +11,8 @@
  */
 
 import type { CommonConsumeplayerCreatePayload } from "./data-contracts";
-import type { ContentType, HttpClient, RequestParams } from "./http-client";
+import type { HttpClient, RequestParams } from "./http-client";
+import { ContentType } from "./http-client";
 
 export class Common<SecurityDataType = unknown> {
   http: HttpClient<SecurityDataType>;

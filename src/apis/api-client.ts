@@ -1,5 +1,6 @@
 // api/apiClient.ts
 import { HttpClient } from './codegen/http-client'
+import { emitter } from '@/core/mitt'
 
 interface SecurityDataType {
   token?: string
@@ -22,7 +23,7 @@ export const apiClient = new HttpClient<SecurityDataType>({
     if (securityData && securityData.token) {
       return {
         headers: {
-          Authorization: `Bearer ${securityData.token}`,
+          Authorization: securityData.token,
         },
       }
     }
@@ -45,7 +46,8 @@ apiClient.instance.interceptors.response.use(
   response => response,
   async error => {
     if (error.response.status === 401 && !error.config._retry) {
-      // TODO 待確認實作 refresh token 邏輯
+      // TODO 權限異常
+      emitter.emit('unAuthorized', true)
     }
     console.log('攔截器 error', error)
     return Promise.reject(error)
