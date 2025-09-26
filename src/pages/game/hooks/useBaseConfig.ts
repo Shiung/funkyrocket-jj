@@ -1,4 +1,5 @@
 import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 
 // 設計基準尺寸 (設計稿的原始尺寸)
 const DESIGN_WIDTH = 750
@@ -21,8 +22,8 @@ const BOTTOM_TO_HORIZON = {
 const gameWidth = ref(DESIGN_WIDTH)
 const gameHeight = ref(DESIGN_HEIGHT)
 
-// 裝置類型判斷 - 基於寬度
-const judgeDeviceType = () => {
+// 裝置類型判斷 - 基於寬度 這邊的_gameWidth沒用，只是讓computed那邊能觸發重新運算而已
+const judgeDeviceType = (_gameWidth?: number) => {
   const parentDom = document.getElementById('app')
   if (!parentDom) return true // 預設為PC
   
@@ -37,13 +38,23 @@ const judgeDeviceType = () => {
   return isPC
 }
 
-const isDesktop = ref(judgeDeviceType())
+const queryDevice = ref<string | undefined>(undefined)
+const isDesktop = computed<boolean>(() => {
+  if (queryDevice.value) return queryDevice.value === 'pc'
+  // 這邊傳gameWidth.value只是為了讓computed那邊能觸發重新運算而已
+  return judgeDeviceType(gameWidth.value)
+})
 
 // 是否為小螢幕
+const queryLayout = ref<string | undefined>(undefined)
 const isCompact = computed(() => {
+  // pc有自己的layout
   if (isDesktop.value) return false
 
-  return gameHeight.value <= 667
+  // 沒有layout則自己判斷
+  if (!queryLayout.value) return gameHeight.value <= 667
+
+  return queryLayout.value === 'compact'
 })
 
 
@@ -65,6 +76,12 @@ const horizon = computed(() => {
 })
 
 export const useBaseConfig = () => {
+  const route = useRoute()
+
+  // 網址給的device跟layout
+  queryDevice.value = route.query.device as string | undefined
+  queryLayout.value = route.query.layout as string | undefined
+
   return {
     // 遊戲尺寸
     gameWidth,
@@ -84,7 +101,6 @@ export const useBaseConfig = () => {
     // 裝置類型
     isDesktop,
     isCompact,
-    judgeDeviceType,
     
     // 縮放因子
     scaleFactorX,

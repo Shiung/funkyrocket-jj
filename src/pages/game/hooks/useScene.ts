@@ -17,7 +17,6 @@ export const useScene = () => {
     isDesktop,
     scaleFactorX,
     scaleFactorY,
-    judgeDeviceType,
   } = useBaseConfig()
 
   // Canvas 引用
@@ -73,8 +72,6 @@ export const useScene = () => {
     const parentDom = document.getElementById('app')
     const viewportWidth = parentDom?.clientWidth || DESIGN_WIDTH
     const viewportHeight = parentDom?.clientHeight || DESIGN_HEIGHT
-
-    isDesktop.value = judgeDeviceType()
 
     if (isDesktop.value) {
       // PC裝置：保持750x1624比例，其餘用pageBackgroundImage填滿
