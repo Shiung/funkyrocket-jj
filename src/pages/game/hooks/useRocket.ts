@@ -13,10 +13,14 @@ import { useBaseConfig } from './useBaseConfig'
 const logger = createLogger()
 
 export const useRocket = (getApp: () => any) => {
+  // 火箭原始高度，重置沒辦法馬上抓到高度，先寫死
+  const ROCKET_ORIGIN_HRIGHT = 432
+
   // 基礎配置
   const {
     gameWidth,
     gameHeight,
+    horizon,
     scaleFactorX,
     scaleFactorY,
     baseOffsetY,
@@ -43,11 +47,11 @@ export const useRocket = (getApp: () => any) => {
       rocketSpine = spineResult.spine
       rocketSpine.zIndex = 1
       app.stage.addChild(rocketSpine)
-      
+
       // 設置火箭位置（居中，考慮縮放因子）
       applySpineTransform(rocketSpine, {
         x: gameWidth.value / 2,
-        y: gameHeight.value / 2 + baseOffsetY.value,
+        y: gameHeight.value - horizon.value - (ROCKET_ORIGIN_HRIGHT * baseScale.value) / 2 - baseOffsetY.value,
         scaleX: baseScale.value,
         scaleY: baseScale.value
       })
@@ -128,11 +132,11 @@ export const useRocket = (getApp: () => any) => {
     if (!rocketSpine) return
 
     clearSpineState(rocketSpine)
-    
+
     // 恢復火箭到原始大小和位置
     applySpineTransform(rocketSpine, {
       x: gameWidth.value / 2,
-      y: gameHeight.value / 2 + baseOffsetY.value,
+      y: gameHeight.value - horizon.value - (ROCKET_ORIGIN_HRIGHT * baseScale.value) / 2 - baseOffsetY.value,
       scaleX: baseScale.value,
       scaleY: baseScale.value
     })
@@ -140,7 +144,7 @@ export const useRocket = (getApp: () => any) => {
     // 播放重置動畫
     playRocketAnimation('restart', false)
     logger.info('🚀 火箭開始震動')
-    
+
     // 0.6 秒後切換到 launch 動畫
     setTimeout(() => {
       if (rocketSpine) {
@@ -157,7 +161,7 @@ export const useRocket = (getApp: () => any) => {
 
     applySpineTransform(rocketSpine, {
       x: gameWidth.value / 2,
-      y: gameHeight.value / 2 + baseOffsetY.value,
+      y: gameHeight.value - horizon.value - (ROCKET_ORIGIN_HRIGHT * baseScale.value) / 2 - baseOffsetY.value,
       scaleX: baseScale.value,
       scaleY: baseScale.value
     })
@@ -169,7 +173,7 @@ export const useRocket = (getApp: () => any) => {
 
     applySpineTransform(rocketSpine, {
       x: x !== undefined ? x : gameWidth.value / 2,
-      y: y !== undefined ? y : gameHeight.value / 2 + baseOffsetY.value,
+      y: y !== undefined ? y : gameHeight.value - horizon.value - (ROCKET_ORIGIN_HRIGHT * baseScale.value) / 2 - baseOffsetY.value,
       scaleX: baseScale.value,
       scaleY: baseScale.value
     })

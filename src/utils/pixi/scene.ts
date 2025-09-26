@@ -2,22 +2,6 @@
  * 場景管理相關工具函數
  */
 
-// 場景狀態枚舉
-export enum SceneState {
-  IDLE = 'idle',           // 待機狀態
-  READY = 'ready',         // 準備狀態（可以上車）
-  COUNTDOWN = 'countdown', // 倒數階段
-  FLYING = 'flying',       // 飛行中
-  EXPLODED = 'exploded'    // 爆炸結束
-}
-
-// 角色類型
-export enum CharacterType {
-  PLAYER = 'player',       // 玩家角色
-  PREMIUM = 'premium',     // 高級角色
-  NPC = 'npc'             // NPC
-}
-
 // 音效類型
 export interface AudioAssets {
   into: string // 角色進艙門

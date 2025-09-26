@@ -156,6 +156,9 @@ const isLoading = ref(true)
 // 場景是否init完成且可以開始遊戲
 const isReadyToPlay = ref(false)
 const handleCloseLoadingEvent = (): void => {
+  // 更新火箭位置
+  updateRocketScale()
+
   isLoading.value = false
   logger.info('🔄 關閉 Loading 事件')
 }
@@ -193,6 +196,9 @@ const initScene = async (): Promise<void> => {
 // 開始遊戲
 const startGame = (): void => {
   if (currentState.value !== GameState.IDLE) return
+
+  // 更新火箭位置
+  updateRocketScale()
   
   logger.info('🎮 開始 Funky Rocket 遊戲')
   setState(GameState.BOARDING)

@@ -1,0 +1,101 @@
+loading.png
+	size: 1300, 272
+	filter: Linear, Linear
+	pma: true
+loading/01
+	bounds: 289, 66, 204, 203
+	offsets: 1, 0, 205, 204
+loading/02
+	bounds: 693, 90, 179, 203
+	offsets: 0, 0, 179, 204
+	rotate: 90
+loading/03
+	bounds: 495, 88, 196, 181
+	offsets: 1, 0, 197, 182
+loading/04
+	bounds: 898, 113, 173, 156
+	offsets: 1, 0, 174, 157
+loading/05
+	bounds: 1073, 101, 168, 141
+	offsets: 1, 0, 169, 142
+	rotate: 90
+loading/06
+	bounds: 898, 5, 119, 106
+loading/07
+	bounds: 880, 41, 13, 20
+	offsets: 1, 0, 14, 21
+loading/08
+	bounds: 880, 63, 16, 25
+loading/09
+	bounds: 1216, 9, 114, 70
+	offsets: 1, 0, 115, 70
+	rotate: 90
+loading/10
+	bounds: 1070, 16, 94, 83
+	offsets: 1, 0, 95, 84
+loading/11
+	bounds: 1019, 15, 96, 49
+	offsets: 1, 0, 98, 51
+	rotate: 90
+loading/12
+	bounds: 1216, 125, 144, 79
+	offsets: 0, 0, 144, 80
+	rotate: 90
+loading/13
+	bounds: 693, 2, 86, 89
+	offsets: 0, 0, 86, 90
+	rotate: 90
+loading/14
+	bounds: 495, 2, 84, 160
+	offsets: 1, 0, 85, 162
+	rotate: 90
+loading/15
+	bounds: 455, 32, 32, 23
+	offsets: 0, 0, 32, 24
+	rotate: 90
+loading/16
+	bounds: 289, 34, 32, 30
+	offsets: 2, 0, 34, 32
+loading/Vectorl
+	bounds: 423, 11, 23, 23
+	offsets: 2, 1, 25, 25
+loading/Vectorr
+	bounds: 657, 9, 34, 34
+	offsets: 2, 1, 37, 37
+loading/balld
+	bounds: 1166, 20, 34, 34
+	offsets: 5, 0, 39, 40
+loading/balll
+	bounds: 448, 9, 22, 21
+	offsets: 3, 0, 25, 26
+loading/ballt
+	bounds: 424, 36, 29, 28
+	offsets: 4, 0, 33, 34
+loading/p01
+	bounds: 389, 11, 23, 32
+	offsets: 0, 1, 24, 34
+	rotate: 90
+loading/p02
+	bounds: 323, 34, 31, 30
+	offsets: 6, 6, 43, 43
+loading/p03
+	bounds: 657, 45, 34, 41
+	offsets: 1, 1, 36, 43
+loading/p04
+	bounds: 1166, 56, 40, 43
+	offsets: 2, 0, 43, 43
+loading/p05
+	bounds: 389, 36, 28, 33
+	offsets: 9, 3, 42, 41
+	rotate: 90
+loading/p06
+	bounds: 356, 34, 30, 31
+	offsets: 7, 6, 43, 43
+	rotate: 90
+loading/p07
+	bounds: 784, 3, 94, 85
+	offsets: 1, 0, 96, 85
+loading/ring
+	bounds: 2, 8, 261, 285
+	offsets: 0, 0, 261, 287
+	rotate: 90

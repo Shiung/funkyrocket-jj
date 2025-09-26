@@ -1,10 +1,10 @@
 <template>
   <!-- Bottom Sheet 控制區域 -->
-  <div class="fixed bottom-0 left-0 right-0 z-40">
+  <div class="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40" :style="genMainStyle">
     <!-- Bottom Sheet 拖拉把手和背景 -->
     <div 
-      class="bg-black/90 backdrop-blur-sm rounded-t-2xl transition-all duration-300 ease-out"
-      :class="{ 'translate-y-0': showBottomSheet, 'translate-y-[calc(100%-60px)]': !showBottomSheet }"
+      class="bg-black/50 backdrop-blur-sm rounded-t-2xl transition-all duration-300 ease-out"
+      :class="{ 'translate-y-0': showBottomSheet, 'translate-y-[calc(100%-39px)]': !showBottomSheet }"
     >
       <!-- 拖拉把手 -->
       <div 
@@ -18,7 +18,7 @@
       </div>
       
       <!-- 控制面板內容 -->
-      <div class="px-4 pb-4 space-y-4 max-h-[calc(50vh-120px)] overflow-y-auto">
+      <div class="px-4 pb-4 space-y-4 overflow-y-auto" :style="genContainerStyle">
         <!-- 階段一：開始遊戲 -->
         <div v-if="currentState === GameState.IDLE" class="space-y-4">
           <div class="text-center">
@@ -183,22 +183,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-
-// 遊戲狀態枚舉
-enum GameState {
-  IDLE = 'IDLE',
-  BOARDING = 'BOARDING',
-  COUNTDOWN = 'COUNTDOWN',
-  LAUNCHING = 'LAUNCHING',
-  FLYING = 'FLYING',
-  DISEMBARKING = 'DISEMBARKING',
-  EXPLODING = 'EXPLODING',
-  COMPLETED = 'COMPLETED'
-}
-
-// 角色類型
-type CharacterType = 'player' | 'streamer' | 'npc'
+import { ref, computed } from 'vue'
+import { useBaseConfig } from '../hooks/useBaseConfig'
+import { GameState, type CharacterType } from '../types'
 
 // Props
 interface Props {
@@ -228,6 +215,23 @@ const emit = defineEmits<{
 
 // State
 const showBottomSheet = ref(true) // 預設展開控制面板
+
+
+const { gameWidth, horizon } = useBaseConfig()
+
+const genMainStyle = computed(() => {
+  return {
+    width: gameWidth.value + 'px',
+  }
+})
+
+// 容器高度 高度/2 - 上方把手高度 - 前景圖最上方到水平線的距離
+const genContainerStyle = computed(() => {
+  return {
+    height: horizon.value - 38 + 'px',
+  }
+})
+
 
 // 角色相關函數
 function getCharacterColor(character: CharacterType): string {

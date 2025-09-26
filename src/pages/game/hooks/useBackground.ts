@@ -7,8 +7,16 @@ const logger = createLogger()
 
 export const useBackground = (getApp: () => any) => {
   // 基礎配置
-  const { gameWidth, gameHeight, MIN_GAME_WIDTH, MAX_GAME_WIDTH, baseOffsetY, isDesktop } =
-    useBaseConfig()
+  const {
+    gameWidth,
+    gameHeight,
+    // baseScale,
+    horizon,
+    MIN_GAME_WIDTH,
+    MAX_GAME_WIDTH,
+    HORIZON_OFFSET,
+    isDesktop,
+  } = useBaseConfig()
   // 背景精靈實例
   let defaultBackgroundSprite: Sprite | null = null
   let cycleBackgroundSprites: Sprite[] = [] // 多個循環背景精靈
@@ -68,20 +76,16 @@ export const useBackground = (getApp: () => any) => {
 
     const texture = frontCloudSprite.texture
 
-    // 設置雲朵寬度填滿螢幕，但限制高度最多到螢幕一半
     const scale = gameWidth.value / texture.width
-    const scaledHeight = texture.height * scale
-    const maxHeight = gameHeight.value * 0.5 // 最多螢幕一半高度
-
+    
     // 寬度始終填滿螢幕
-    frontCloudSprite.width = gameWidth.value
+    // frontCloudSprite.width = gameWidth.value
+    frontCloudSprite.scale.x = scale
+    frontCloudSprite.scale.y = scale
     frontCloudSprite.x = 0
+    frontCloudSprite.y = gameHeight.value - horizon.value - (HORIZON_OFFSET * 2 * scale)
+    console.log('### updateDefaultFrontCloudScale', gameHeight.value - horizon.value - HORIZON_OFFSET)
 
-    // 高度限制在螢幕一半
-    frontCloudSprite.height = Math.min(scaledHeight, maxHeight)
-
-    // 靠下對齊 - 放在畫面底部
-    frontCloudSprite.y = gameHeight.value / 2 + baseOffsetY.value
     frontCloudSprite.zIndex = 0 // 在背景上、火箭下
   }
 
@@ -90,16 +94,17 @@ export const useBackground = (getApp: () => any) => {
     if (!frontCloudSprite) return
 
     const texture = frontCloudSprite.texture
+    const baseScale = 0.5
 
     if (gameWidth.value >= MIN_GAME_WIDTH && gameWidth.value <= MAX_GAME_WIDTH) {
       // 375-450範圍：縮放到0.5倍並置中，讓螢幕裁切
       console.log('🌤️ 手機模式 - 前景雲朵：0.5倍裁切模式')
 
-      frontCloudSprite.scale.set(0.5) // 縮放到0.5倍（900px → 450px）
+      frontCloudSprite.scale.set(baseScale) // 縮放到0.5倍（900px → 450px）
 
-      const scaledWidth = texture.width * 0.5 // 450px
+      const scaledWidth = texture.width * baseScale // 450px
       frontCloudSprite.x = Math.floor((gameWidth.value - scaledWidth) / 2) // 置中對齊
-      frontCloudSprite.y = gameHeight.value / 2 + baseOffsetY.value
+      frontCloudSprite.y = gameHeight.value - horizon.value - HORIZON_OFFSET * 2 * baseScale
 
       console.log(
         `手機裁切模式 - 螢幕寬度: ${gameWidth.value}px, 雲朵寬度: ${scaledWidth}px, x位置: ${frontCloudSprite.x}px`,
@@ -109,7 +114,6 @@ export const useBackground = (getApp: () => any) => {
       console.log('🌤️ 手機模式 - 前景雲朵：375基準縮放模式')
 
       // 計算以375為基準的縮放比例
-      const baseScale = 0.5 // 375px時的基準縮放（900px → 450px）
       const scaleFactor = gameWidth.value / MIN_GAME_WIDTH // 相對於375的縮放係數
       const finalScale = baseScale * scaleFactor
 
@@ -117,11 +121,10 @@ export const useBackground = (getApp: () => any) => {
 
       const scaledWidth = texture.width * finalScale
       frontCloudSprite.x = Math.floor((gameWidth.value - scaledWidth) / 2) // 置中對齊
-      frontCloudSprite.y = gameHeight.value / 2 + baseOffsetY.value
+      frontCloudSprite.y = gameHeight.value - horizon.value - HORIZON_OFFSET * 2 * baseScale
 
-      console.log(
-        `375基準縮放模式 - 螢幕寬度: ${gameWidth.value}px, 縮放係數: ${scaleFactor.toFixed(3)}, 最終縮放: ${finalScale.toFixed(3)}, 雲朵寬度: ${scaledWidth.toFixed(0)}px`,
-      )
+      console.log(`375基準縮放模式 - 螢幕寬度: ${gameWidth.value}px, 縮放係數: ${scaleFactor.toFixed(3)}, 最終縮放: ${finalScale.toFixed(3)}, 雲朵寬度: ${scaledWidth.toFixed(0)}px`)
+      
     } else {
       // 450以上：使用預設處理
       console.log('🌤️ 手機模式 - 前景雲朵：使用預設處理')
@@ -474,7 +477,7 @@ export const useBackground = (getApp: () => any) => {
         ;(defaultBackgroundSprite as any).zIndex = -1 // 比舊背景(-10)和循環背景(-5)都高
       }
       if (frontCloudSprite) {
-        ;(frontCloudSprite as any).zIndex = 20 // 比舊前景(10)高
+        ;(frontCloudSprite as any).zIndex = 0
       }
 
       // 立即排序以確保顯示順序正確
