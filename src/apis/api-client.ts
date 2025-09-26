@@ -11,7 +11,7 @@ console.log('isDevelopMode', isDevelopMode)
 
 // 初始化全局的 HttpClient 实例
 export const apiClient = new HttpClient<SecurityDataType>({
-  baseURL: isDevelopMode ? 'https://fc.ljbdev.site/fk/' : '/fk',
+  baseURL: '/fk',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

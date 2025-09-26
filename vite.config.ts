@@ -1,4 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
+import fs from 'fs'
+import path from 'path'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -8,12 +10,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    vueJsx(),
-    vueDevTools(),
-    tailwindcss(),
-  ],
+  plugins: [vue(), vueJsx(), vueDevTools(), tailwindcss()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -24,11 +21,21 @@ export default defineConfig({
   server: {
     host: '0.0.0.0', // 允許外部設備訪問
     port: 5173,
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, 'certs/localhost-key.pem')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'certs/localhost.pem')),
+    },
+    proxy: {
+      '/fk': {
+        target: 'https://fc.ljbdev.site',
+        changeOrigin: true,
+      },
+    },
     fs: {
-      allow: ['..']
-    }
+      allow: ['..'],
+    },
   },
   build: {
-    assetsInlineLimit: 0 // 不內聯任何資源，都作為獨立文件處理
-  }
+    assetsInlineLimit: 0, // 不內聯任何資源，都作為獨立文件處理
+  },
 })
