@@ -8,7 +8,7 @@ import { generateApi } from 'swagger-typescript-api'
 
 const apisDir = './src/apis'
 // 远程 Swagger API 文档的 URL
-const swaggerUrl = 'https://gate.ljbdev.site/api/cashorcrash/swagger/v1/swagger.json'
+const swaggerUrl = 'https://fc.ljbdev.site/api/cashorcrash/swagger/v1/swagger.json'
 // 输出的类型定义目录
 const outputDir = `${apisDir}/codegen`
 // Swagger JSON 文件的本地路径

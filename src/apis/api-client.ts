@@ -11,7 +11,7 @@ console.log('isDevelopMode', isDevelopMode)
 
 // 初始化全局的 HttpClient 实例
 export const apiClient = new HttpClient<SecurityDataType>({
-  baseURL: isDevelopMode ? 'https://gate.ljbdev.site/fk/' : '/',
+  baseURL: isDevelopMode ? 'https://fc.ljbdev.site/fk/' : '/fk',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -19,7 +19,7 @@ export const apiClient = new HttpClient<SecurityDataType>({
   },
   secure: true,
   withCredentials: true,
-  securityWorker: securityData => {
+  securityWorker: (securityData) => {
     if (securityData && securityData.token) {
       return {
         headers: {
@@ -32,26 +32,26 @@ export const apiClient = new HttpClient<SecurityDataType>({
 
 // 全局错误处理 request 攔截器
 apiClient.instance.interceptors.request.use(
-  response => {
+  (response) => {
     // console.log('response ===>', response)
     return response
   },
-  error => {
+  (error) => {
     return Promise.reject(error)
-  }
+  },
 )
 
 // 全局错误处理 response 攔截器
 apiClient.instance.interceptors.response.use(
-  response => response,
-  async error => {
+  (response) => response,
+  async (error) => {
     if (error.response.status === 401 && !error.config._retry) {
       // TODO 權限異常
       emitter.emit('unAuthorized', true)
     }
     console.log('攔截器 error', error)
     return Promise.reject(error)
-  }
+  },
 )
 
 export const setHeaderToken = (token: string | null) => {
