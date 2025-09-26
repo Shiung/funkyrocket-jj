@@ -70,8 +70,8 @@ export class wsBase {
 
     this.ws.onclose = (event) => {
       this.reconnectIng = false
-      debugMessage({ type: 'system', title: '😱 onclose', msg: event, isDebug: this._wsDebug })
-      
+      debugMessage({ type: 'system', title: '😱 onclose event', msg: event, isDebug: this._wsDebug })
+      debugMessage({ type: 'system', title: '😱 onclose flag', msg: this.endOfWs, isDebug: this._wsDebug })
       if (event.code === 1000 || this.endOfWs) {
         // 使用者發起的關閉
         return
@@ -87,7 +87,12 @@ export class wsBase {
     const maxReAttemp = this.options.reconnectAttempts || _defaultOption.reconnectAttempts
     const reconnectTimeout = this.options.reconnectTimeout || _defaultOption.reconnectTimeout
 
-    if (this.reconnectIng || this.reconnectCount > maxReAttemp) return // 終止重新連線
+    if (this.reconnectIng || this.reconnectCount > maxReAttemp) {
+      if (typeof this.options.forbiddenCb === 'function') {
+        this.options.forbiddenCb()
+      }
+      return // 終止重新連線
+    }
     
     this.reconnectIng = true
 
@@ -106,7 +111,9 @@ export class wsBase {
     this.connect()
   }
 
-  /** close socket */
+  /** close socket
+   * @param status default `1000` 強制關閉不會 reconnect || `1006` 關閉但會自動執行reconnect
+   */
   public async close(status: number = 1000): Promise<void> {
     if (!this.ws || [WebSocket.CLOSING, WebSocket.CLOSED].some(status => status === this.ws?.readyState)) {
       return Promise.resolve()
