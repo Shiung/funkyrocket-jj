@@ -33,8 +33,8 @@ const initLoadingSpine = async () => {
     // 使用現有的 createPixiApp 函數
     const pixiResult = await createPixiApp({
       canvas: loadingCanvasRef.value,
-      width: 152, // 9.5rem = 152px
-      height: 200, // 11.25rem = 180px
+      width: 152,
+      height: 210,
       backgroundColor: 0x000000,
       backgroundAlpha: 0 // 透明背景
     })
@@ -52,7 +52,7 @@ const initLoadingSpine = async () => {
 
     // 設置 Spine 位置和縮放
     loadingSpine.x = 76 // 畫布中心
-    loadingSpine.y = 125
+    loadingSpine.y = 135
     loadingSpine.scale.set(0.5) // 根據需要調整大小
 
     loadingApp.stage.addChild(loadingSpine)
@@ -97,14 +97,15 @@ onUnmounted(() => {
 
 <template>
   <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-90 z-50" :style="genMainStyle">
-    <div class="h-full w-full flex flex-col gap-3 items-center justify-center">
+    <div class="h-full w-full flex flex-col items-center justify-center">
       <canvas 
         ref="loadingCanvasRef" 
         class="w-[9.5rem] h-[11.25rem]"
       ></canvas>
-      <div class="text-white text-base">游戏载入中...</div>
+      <div v-if="!props.isReadyToPlay" class="text-white text-base">游戏载入中...</div>
       <!-- TODO: color -->
       <button
+        v-else
         :class="['rounded-lg px-3 py-1.5', !props.isReadyToPlay ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#B241FD] cursor-pointer']"
         :disabled="!props.isReadyToPlay" @click="handleCloseClick">
         <span :class="['text-base', !props.isReadyToPlay ? 'text-gray-400' : 'text-white']">开始游玩</span>

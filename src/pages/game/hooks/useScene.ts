@@ -5,6 +5,13 @@ import { createLogger } from '@/utils/pixi/logger'
 import { CountdownTimer } from '@/utils/pixi/scene'
 import { useBaseConfig } from './useBaseConfig'
 
+// Canvas 引用
+const canvasRef = ref<HTMLCanvasElement>()
+
+// PixiJS 相關實例
+let app: Application | null = null
+let countdownTimer: CountdownTimer | null = null
+
 const logger = createLogger()
 
 export const useScene = () => {
@@ -18,13 +25,6 @@ export const useScene = () => {
     scaleFactorX,
     scaleFactorY,
   } = useBaseConfig()
-
-  // Canvas 引用
-  const canvasRef = ref<HTMLCanvasElement>()
-
-  // PixiJS 相關實例
-  let app: Application | null = null
-  let countdownTimer: CountdownTimer | null = null
 
   // 獲取 PixiJS app 實例的函數
   const getApp = () => app

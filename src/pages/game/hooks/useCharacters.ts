@@ -10,6 +10,9 @@ import { createFollowText } from '@/utils/pixi/textFollower'
 import type { CharacterType, Character } from '../types'
 import { useBaseConfig } from './useBaseConfig'
 
+// 角色實例管理
+const characters: Map<string, Character> = new Map()
+
 const logger = createLogger()
 
 export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
@@ -39,8 +42,6 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
     // 一般手機
     return isNpc ? baseX - offset : baseX + offset
   }
-  // 角色實例管理
-  const characters: Map<string, Character> = new Map()
 
   // 固定使用 funkyRocket 的 getSpineAssets 函數
   const getSpineAssets = (animationName: string) => {
