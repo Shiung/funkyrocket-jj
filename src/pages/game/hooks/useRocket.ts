@@ -10,6 +10,10 @@ import { createLogger } from '@/utils/pixi/logger'
 import { createFloatEffect, type EffectState } from '@/utils/pixi/effects'
 import { useBaseConfig } from './useBaseConfig'
 
+// 火箭實例
+let rocketSpine: any = null
+let rocketFloatEffect: EffectState | null = null
+
 const logger = createLogger()
 
 export const useRocket = (getApp: () => any) => {
@@ -26,10 +30,6 @@ export const useRocket = (getApp: () => any) => {
     baseOffsetY,
     baseScale
   } = useBaseConfig()
-
-  // 火箭實例
-  let rocketSpine: any = null
-  let rocketFloatEffect: EffectState | null = null
 
   // 初始化火箭
   const initializeRocket = async (): Promise<any> => {

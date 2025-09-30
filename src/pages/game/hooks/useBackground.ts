@@ -3,6 +3,20 @@ import { Assets, Sprite } from 'pixi.js'
 import { createLogger } from '@/utils/pixi/logger'
 import { useBaseConfig } from './useBaseConfig'
 
+// 背景精靈實例
+let defaultBackgroundSprite: Sprite | null = null
+let cycleBackgroundSprites: Sprite[] = [] // 多個循環背景精靈
+let frontCloudSprite: Sprite | null = null // 前景雲朵
+
+// 背景滾動狀態
+const isScrolling = ref(false)
+const scrollSpeed = ref(5) // 滾動速度 (初始值)
+
+// 計算屬性：滾動相關參數
+const baseScrollSpeed = ref(5)
+const speedIncrease = ref(0.02)
+const maxScrollSpeed = ref(20)
+
 const logger = createLogger()
 
 export const useBackground = (getApp: () => any) => {
@@ -17,19 +31,6 @@ export const useBackground = (getApp: () => any) => {
     HORIZON_OFFSET,
     isDesktop,
   } = useBaseConfig()
-  // 背景精靈實例
-  let defaultBackgroundSprite: Sprite | null = null
-  let cycleBackgroundSprites: Sprite[] = [] // 多個循環背景精靈
-  let frontCloudSprite: Sprite | null = null // 前景雲朵
-
-  // 背景滾動狀態
-  const isScrolling = ref(false)
-  const scrollSpeed = ref(5) // 滾動速度 (初始值)
-
-  // 計算屬性：滾動相關參數
-  const baseScrollSpeed = ref(5)
-  const speedIncrease = ref(0.02)
-  const maxScrollSpeed = ref(20)
 
   // 響應式資源路徑 - 固定使用 funkyRocket
   const defaultBackground = computed(() => '/assets/images/bg/default.webp')
@@ -84,7 +85,7 @@ export const useBackground = (getApp: () => any) => {
     frontCloudSprite.scale.y = scale
     frontCloudSprite.x = 0
     frontCloudSprite.y = gameHeight.value - horizon.value - (HORIZON_OFFSET * 2 * scale)
-    console.log('### updateDefaultFrontCloudScale', gameHeight.value - horizon.value - HORIZON_OFFSET)
+    logger.info('### updateDefaultFrontCloudScale', gameHeight.value - horizon.value - HORIZON_OFFSET)
 
     frontCloudSprite.zIndex = 0 // 在背景上、火箭下
   }

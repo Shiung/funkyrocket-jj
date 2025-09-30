@@ -184,6 +184,10 @@ export class AudioManager {
     }
   }
 
+  isBGMActive(key: string): boolean {
+    return this.activeBGMs.has(key)
+  }
+
   setVolume(volume: number): void {
     const normalizedVolume = Math.max(0, Math.min(1, volume))
     // 儲存預設音量

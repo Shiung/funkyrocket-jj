@@ -2,43 +2,77 @@
 type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
 
 export enum ActionType {
-  /** @description 新的一局遊戲開啟。 */
+  /**
+   * @switchTo IDLE
+   * @action
+   * @description 新的一局遊戲開啟。
+  */
   JOIN_GAME = 0,
-  /** @deprecated */
+  /** @deprecated 已棄用 */
   UPDATE_PLAYER_COUNT = 1,
   /**
+   * @switchTo BOARDING
+   * @action
    * @description 新的一局開始
    * @param countDown 該局開始倒數的秒數
   */
   OPEN_BET = 2,
-  /** @description 停止收注 */
+  /**
+   * @switchTo LAUNCHING
+   * @action
+   * @description 停止收注
+  */
   CLOSE_BET = 3,
-  /** @description 火箭爆炸，爆炸時的秒數及結果 */
+  /**
+   * @switchTo EXPLODING
+   * @action
+   * @description 火箭爆炸，爆炸時的秒數及結果
+  */
   GAME_RESULT = 4,
-  /** @description 後端結算 */
+  /**
+   * @switchTo COMPLETED
+   * @action
+   * @description 後端結算
+  */
   BET_RESULT = 5,
   /**
+   * @switchTo BOARDING | COUNTDOWN（剩五秒才切到COUNTDOWN）
+   * @action
    * @description
    * @param countDown 現在秒數值，每秒更新，第一個訊息與 OPEN_BET 同時
   */
   SYNC_TIMER = 8,
-  /** @description 過去 30 局結果，最高長度為 30，新紀錄會出現在陣列前面，超過 30 局會 pop 掉舊的資料 */
+  /**
+   * @switchTo
+   * @action 給遊戲端資料
+   * @description 過去 30 局結果，最高長度為 30，新紀錄會出現在陣列前面，超過 30 局會 pop 掉舊的資料
+  */
   GET_HISTORY = 10,
   /**
+   * @switchTo
+   * @action BOARDING時用遊戲端給的帳號判斷NPC或主播上船，更新右上角資訊
    * @param onBoards 目前上船人數
    * @param othersPlayers 最新上船玩家列表，最高長度為 12，新上船的玩家會出現在陣列前面，超過 12 人會 pop 掉舊的資料
    * 
   */
   UPDATE_OTHER_CHIPS = 11,
-  /** @description 提醒前端發送 get balance 請求 */
+  /**
+   * @switchTo
+   * @action EXPLODING或COMPLETED時通知遊戲端要更新餘額
+   * @description 提醒前端發送 get balance 請求
+  */
   GET_BALANCE = 12,
   /**
+   * @switchTo DISEMBARKING
+   * @action 更新左上跟中上資訊
    * @description 火箭進度
    * @param currentSecond 當前經過的秒數
    * @param odds 當前賠率
   */
   DRAWING = 14,
   /**
+   * @switchTo
+   * @action DISEMBARKING時跳船，遊戲端會給主播帳號，要判斷主播或NPC跳船
    * @description 在 DRAWING 階段時會不定時發送
    * @param onBoards 目前仍在船上人數，
    * @param othersCashOut 最近 12 個 cashout 的玩家，最高長度為 12，

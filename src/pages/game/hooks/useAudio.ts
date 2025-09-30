@@ -1,16 +1,15 @@
 import { ref, computed } from 'vue'
 import { AudioManager, type AudioAssets } from '@/utils/pixi/scene'
 import { useAudioStore } from '@/stores/audio'
-import { GameState } from '../types'
 import { createLogger } from '@/utils/pixi/logger'
+
+// 音效管理器實例
+const audioManager = ref<AudioManager | null>(null)
 
 const logger = createLogger()
 
 export const useAudio = () => {
   const audioStore = useAudioStore()
-  
-  // 音效管理器實例
-  const audioManager = ref<AudioManager | null>(null)
 
   // 響應式音效資源配置 - 固定使用 funkyRocket
   const audioAssets = computed<AudioAssets>(() => ({
@@ -76,25 +75,9 @@ export const useAudio = () => {
     logger.info(`🔊 音效${audioStore.soundEffectEnabled ? '已開啟' : '已關閉'}`)
   }
 
-  // 根據遊戲狀態播放對應的 BGM
-  const playBGMForGameState = (gameState: GameState): void => {
-    if (!audioManager.value || !audioStore.bgmEnabled) return
-
-    if (gameState === GameState.BOARDING || gameState === GameState.COUNTDOWN || gameState === GameState.LAUNCHING) {
-      audioManager.value.playBGM('bgm_open', true)
-      logger.info('🎵 播放開場音樂')
-    } else if (gameState === GameState.FLYING) {
-      audioManager.value.playBGM('bgm_fly', true)
-      logger.info('🎵 播放飛行音樂')
-    } else if (gameState === GameState.DISEMBARKING) {
-      audioManager.value.playBGM('bgm_fly', true)
-      logger.info('🎵 播放火箭音效')
-    }
-  }
-
   // 安全播放 BGM（檢查開關狀態）
   const playBGM = (key: string, loop: boolean = true): void => {
-    if (!audioManager.value || !audioStore.bgmEnabled) return
+    if (!audioManager.value || !audioStore.bgmEnabled || audioManager.value.isBGMActive(key)) return
     audioManager.value.playBGM(key, loop)
   }
 
@@ -110,14 +93,6 @@ export const useAudio = () => {
 
     if (key) audioManager.value.stopBGM(key)
     else audioManager.value.stopAllBGM()
-  }
-
-  // 停止所有音效
-  const stopAllAudio = (): void => {
-    if (audioManager.value) {
-      audioManager.value.stopAllBGM()
-      logger.info('🔇 停止所有音效')
-    }
   }
 
   // 銷毀音效系統
@@ -139,11 +114,9 @@ export const useAudio = () => {
     updateVolume,
     toggleBGM,
     toggleSoundEffect,
-    playBGMForGameState,
     playBGM,
     playSound,
     stopBGM,
-    stopAllAudio,
     destroyAudio,
 
     // Store 狀態

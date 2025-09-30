@@ -119,7 +119,7 @@
             <select 
               id="gameStateSelect"
               :value="currentState"
-              @change="(e) => emit('changeGameState', (e.target as HTMLSelectElement).value)"
+              @change="(e) => emit('changeGameState', (e.target as HTMLSelectElement).value as GameState)"
               class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="IDLE">🏠 待機 (IDLE)</option>
@@ -210,7 +210,7 @@ const emit = defineEmits<{
   npcDisembark: []
   explodeRocket: []
   resetGame: []
-  changeGameState: [gameState: string]
+  changeGameState: [gameState: GameState]
 }>()
 
 // State
