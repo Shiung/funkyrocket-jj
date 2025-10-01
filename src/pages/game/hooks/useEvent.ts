@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { ActionType, type MessageMap } from '@/core/wsClient/types/message'
 import { emitter } from '@/core/mitt'
 import { createLogger } from '@/utils/pixi/logger'
@@ -13,10 +13,15 @@ import { useScene } from './useScene'
 const logger = createLogger()
 
 export const useEvent = () => {
+
+  const steamerAccount = ref('') // 主播帳號
+  const steamerJumped = ref(false) // 主播是否已跳船
+
   // 遊戲狀態管理
   const {
     currentState,
-    isAnimating,
+    isIdle,
+    isBoarding,
     isFlying,
     isDisembarking,
     hasPlayedLaunchPlayer,
@@ -243,7 +248,7 @@ export const useEvent = () => {
   }
 
   // 主播下車
-  const streamerDisembark = async (): Promise<void> => {
+  const streamerDisembark = async (streamerOdds?: number): Promise<void> => {
     if (hasPlayedLaunchPlayer.value) {
       setLaunchPlayerPlayed(false)
       const trackEntry = playRocketAnimationWithTrack('launch_player', false, 1)
@@ -262,9 +267,12 @@ export const useEvent = () => {
       await new Promise(resolve => setTimeout(resolve, 1500))
     }
 
+    // 有可能頭縮下去的時候就爆了，那也不用跳船了
+    if (!isDisembarking.value) return
+
     const character = await createCharacterJump('streamer', `streamer-disembark-${Date.now()}`, { 
-      name: '主播下車囉', 
-      odds: '9999999.99x' 
+      name: steamerAccount.value,
+      odds: `${streamerOdds}x`
     })
     if (!character) return
 
@@ -275,6 +283,8 @@ export const useEvent = () => {
 
   // NPC下車
   const npcDisembark = async (): Promise<void> => {
+    if (!isDisembarking.value) return
+
     const character = await createCharacterJump('npc', `npc-disembark-${Date.now()}`)
     if (!character) return
 
@@ -285,8 +295,6 @@ export const useEvent = () => {
 
   // 火箭爆炸
   const explodeRocket = async (): Promise<void> => {
-    if (isAnimating.value) return
-    
     logger.info('💥 火箭爆炸')
     setState(GameState.EXPLODING)
     setAnimating(true)
@@ -322,6 +330,9 @@ export const useEvent = () => {
   // 重置遊戲
   const resetGame = async (): Promise<void> => {
     logger.info('🔄 重置 Funky Rocket 遊戲')
+
+    // 重置主播帳號
+    steamerAccount.value = ''
 
     // 重新開始音效
     playSound('return')
@@ -469,20 +480,27 @@ export const useEvent = () => {
   }
   const handleOpenBetEvent = (m: MessageMap[ActionType.OPEN_BET]) => {
     logger.info(`### gameEvent [${ActionType[ActionType.OPEN_BET]}] ===> `, m)
+    if (isIdle.value) return startGame()
     changeGameState(GameState.BOARDING)
   }
   const handleSyncTimerEvent = (m: MessageMap[ActionType.SYNC_TIMER]) => {
     logger.info(`### gameEvent [${ActionType[ActionType.SYNC_TIMER]}] ===> `, m)
     if (m.countDown !== 5) return
+
+    if (isBoarding.value) return startCountdown()
     changeGameState(GameState.COUNTDOWN)
   }
   const handleUpdateOtherChipsEvent = (m: MessageMap[ActionType.UPDATE_OTHER_CHIPS]) => {
     logger.info(`### gameEvent [${ActionType[ActionType.UPDATE_OTHER_CHIPS]}] ===> `, m)
     // 動畫要花三秒才能跑完
     if (countdown.value < 3) return
-    // TODO - 處理判斷要哪個
-    npcBoard()
-    streamerBoard()
+    // TODO - 先塞個假資料
+    if (!steamerAccount.value) steamerAccount.value = m.othersPlayers[0].playerId
+
+    if (m.othersPlayers.some(d => d.playerId === steamerAccount.value)) streamerBoard()
+    else npcBoard()
+
+    console.log('### steamerAccount', steamerAccount.value)
   }
   const handleCloseBetEvent = (m: MessageMap[ActionType.CLOSE_BET]) => {
     logger.info(`### gameEvent [${ActionType[ActionType.CLOSE_BET]}] ===> `, m)
@@ -494,9 +512,18 @@ export const useEvent = () => {
   }
   const handleCashOutEvent = (m: MessageMap[ActionType.CASH_OUT]) => {
     logger.info(`### gameEvent [${ActionType[ActionType.CASH_OUT]}] ===> `, m)
-    // TODO - 處理判斷要哪個
-    npcDisembark()
-    streamerDisembark()
+
+    // 計算有幾人跳船，沒人就不跳
+    // 判斷主播有沒有跳船，odds有值代表已跳
+    const streamerOdds = m.othersCashOut.find(d => d.playerId === steamerAccount.value)?.odds
+    // 如果主播跳船，則不計算主播
+    const jumpCount = m.oddsCount.reduce((acc, curr) => acc + curr.count, streamerOdds ? -1 : 0)
+    // 分開跳不要擠
+    if (jumpCount) for (let i = 0; i < jumpCount; i++) setTimeout(() => npcDisembark(), i * 100)
+    if (streamerOdds && !steamerJumped.value) {
+      steamerJumped.value = true
+      streamerDisembark(streamerOdds)
+    }
   }
   const handleGameResultEvent = (m: MessageMap[ActionType.GAME_RESULT]) => {
     logger.info(`### gameEvent [${ActionType[ActionType.GAME_RESULT]}] ===> `, m)

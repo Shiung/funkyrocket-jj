@@ -29,9 +29,7 @@ export async function loadSpineAssets(
   assets: SpineAssets, 
   logger?: (message: string) => void
 ): Promise<LoadedAssets> {
-  const log = logger || console.log
-  
-  log('開始載入 Spine 動畫資源...')
+  logger?.('開始載入 Spine 動畫資源...')
   
   // 生成唯一鍵名
   const skelKey = generateAssetKey('skel')
@@ -39,7 +37,7 @@ export async function loadSpineAssets(
   const imageKey = assets.imagePath ? generateAssetKey('image') : undefined
   
   // 註冊資源
-  log('註冊並載入資源到緩存...')
+  logger?.('註冊並載入資源到緩存...')
   Assets.add({ alias: skelKey, src: assets.skelPath })
   Assets.add({ alias: atlasKey, src: assets.atlasPath })
   
@@ -52,7 +50,7 @@ export async function loadSpineAssets(
   
   // 載入資源
   await Assets.load(assetsToLoad)
-  log('✅ Spine 動畫資源載入完成')
+  logger?.('✅ Spine 動畫資源載入完成')
   
   return {
     skelKey,

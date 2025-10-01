@@ -70,24 +70,23 @@ export function getRendererDetails(renderer: Renderer): RendererDetails {
  * 記錄渲染器信息
  */
 export function logRendererInfo(renderer: Renderer, logger?: (message: string) => void) {
-  const log = logger || console.log
   const details = getRendererDetails(renderer)
   
-  log(`PIXI 版本: ${VERSION}`)
-  log(`渲染器類型代碼: ${details.type}`)
-  log(`渲染器名稱: ${details.name}`)
-  log(`渲染器類型: ${details.typeName}`)
+  logger?.(`PIXI 版本: ${VERSION}`)
+  logger?.(`渲染器類型代碼: ${details.type}`)
+  logger?.(`渲染器名稱: ${details.name}`)
+  logger?.(`渲染器類型: ${details.typeName}`)
   
   // 檢查 PIXI 渲染器類型常量
-  log('PIXI 渲染器類型常量:')
-  log(`- WEBGL: ${RendererType.WEBGL}`)
-  log(`- WEBGPU: ${RendererType.WEBGPU}`)
+  logger?.('PIXI 渲染器類型常量:')
+  logger?.(`- WEBGL: ${RendererType.WEBGL}`)
+  logger?.(`- WEBGPU: ${RendererType.WEBGPU}`)
   
   if (details.isWebGPU) {
-    log('🚀 使用最新的 WebGPU 渲染器！')
+    logger?.('🚀 使用最新的 WebGPU 渲染器！')
   } else if (details.isWebGL) {
-    log('📊 使用穩定的 WebGL 渲染器')
+    logger?.('📊 使用穩定的 WebGL 渲染器')
   } else {
-    log(`❓ 使用未知的渲染器類型: ${details.type}`)
+    logger?.(`❓ 使用未知的渲染器類型: ${details.type}`)
   }
 }

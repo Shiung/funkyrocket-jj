@@ -93,15 +93,13 @@ export function createDefaultTextConfig(): TextConfig {
  */
 export function createPixiText(
   config: Partial<TextConfig> = {},
-  logFunction?: (message: string) => void
+  logger?: (message: string) => void
 ): CreateTextResult {
-  const log = logFunction || (() => {})
-  
   try {
     // 合併預設配置
     const finalConfig = { ...createDefaultTextConfig(), ...config }
     
-    log(`📝 創建文字物件: "${finalConfig.text}"`)
+    logger?.(`📝 創建文字物件: "${finalConfig.text}"`)
     
     // 創建文字樣式
     const textStyle = new TextStyle({
@@ -129,7 +127,7 @@ export function createPixiText(
       style: textStyle
     })
     
-    log(`✅ 文字物件創建成功`)
+    logger?.(`✅ 文字物件創建成功`)
     
     // 返回管理接口
     return {
@@ -138,9 +136,9 @@ export function createPixiText(
       updateText(newText: string) {
         try {
           textObject.text = newText
-          log(`📝 文字內容已更新: "${newText}"`)
+          logger?.(`📝 文字內容已更新: "${newText}"`)
         } catch (err) {
-          log(`❌ 更新文字內容失敗: ${err}`)
+          logger?.(`❌ 更新文字內容失敗: ${err}`)
         }
       },
       
@@ -189,9 +187,9 @@ export function createPixiText(
           // 應用更新後的配置
           Object.assign(finalConfig, styleConfig)
           
-          log(`🎨 文字樣式已更新`)
+          logger?.(`🎨 文字樣式已更新`)
         } catch (err) {
-          log(`❌ 更新文字樣式失敗: ${err}`)
+          logger?.(`❌ 更新文字樣式失敗: ${err}`)
         }
       },
       
@@ -205,18 +203,18 @@ export function createPixiText(
           if (transform.zIndex !== undefined) textObject.zIndex = transform.zIndex
           if (transform.visible !== undefined) textObject.visible = transform.visible
           
-          log(`📍 文字變換已更新: (${textObject.x}, ${textObject.y})`)
+          logger?.(`📍 文字變換已更新: (${textObject.x}, ${textObject.y})`)
         } catch (err) {
-          log(`❌ 設置文字變換失敗: ${err}`)
+          logger?.(`❌ 設置文字變換失敗: ${err}`)
         }
       },
       
       setVisible(visible: boolean) {
         try {
           textObject.visible = visible
-          log(`👁️ 文字${visible ? '顯示' : '隱藏'}: "${textObject.text}"`)
+          logger?.(`👁️ 文字${visible ? '顯示' : '隱藏'}: "${textObject.text}"`)
         } catch (err) {
-          log(`❌ 設置文字可見性失敗: ${err}`)
+          logger?.(`❌ 設置文字可見性失敗: ${err}`)
         }
       },
       
@@ -226,15 +224,15 @@ export function createPixiText(
             textObject.parent.removeChild(textObject)
           }
           textObject.destroy()
-          log(`🗑️ 文字物件已銷毀`)
+          logger?.(`🗑️ 文字物件已銷毀`)
         } catch (err) {
-          log(`❌ 銷毀文字物件失敗: ${err}`)
+          logger?.(`❌ 銷毀文字物件失敗: ${err}`)
         }
       }
     }
     
   } catch (err) {
-    log(`❌ 創建文字物件失敗: ${err}`)
+    logger?.(`❌ 創建文字物件失敗: ${err}`)
     throw err
   }
 }
@@ -246,10 +244,8 @@ export function addTextToStage(
   app: Application,
   textResult: CreateTextResult,
   transform?: TextTransform,
-  logFunction?: (message: string) => void
+  logger?: (message: string) => void
 ): void {
-  const log = logFunction || (() => {})
-  
   try {
     // 設置初始變換
     if (transform) {
@@ -262,10 +258,10 @@ export function addTextToStage(
     // 確保 zIndex 生效
     app.stage.sortChildren()
     
-    log(`🎭 文字已添加到舞台`)
+    logger?.(`🎭 文字已添加到舞台`)
     
   } catch (err) {
-    log(`❌ 添加文字到舞台失敗: ${err}`)
+    logger?.(`❌ 添加文字到舞台失敗: ${err}`)
     throw err
   }
 }

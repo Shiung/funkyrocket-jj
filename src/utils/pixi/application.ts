@@ -39,17 +39,16 @@ export async function createPixiApp(config: AppConfig): Promise<CreateAppResult>
     antialias = true,
     logger,
   } = config
-  const log = logger || console.log
 
-  log('=== 開始 PixiJS 應用初始化 ===')
+  logger?.('=== 開始 PixiJS 應用初始化 ===')
 
   const DPR = Math.min(window.devicePixelRatio || 1, 2)
 
   // 檢查瀏覽器支援
   const rendererSupport = await checkRendererSupport()
-  log(`WebGL 支援: ${rendererSupport.hasWebGL}`)
-  log(`WebGPU 支援: ${rendererSupport.hasWebGPU}`)
-  log(`WebGPU 適配器: ${rendererSupport.webgpuAdapter ? '可用' : '不可用'}`)
+  logger?.(`WebGL 支援: ${rendererSupport.hasWebGL}`)
+  logger?.(`WebGPU 支援: ${rendererSupport.hasWebGPU}`)
+  logger?.(`WebGPU 適配器: ${rendererSupport.webgpuAdapter ? '可用' : '不可用'}`)
 
   // 創建應用
   const app = new Application()
@@ -69,7 +68,7 @@ export async function createPixiApp(config: AppConfig): Promise<CreateAppResult>
   canvas.style.height = `${height}px`
   app.renderer.resize(width, height)
 
-  log('✅ PIXI 應用創建成功')
+  logger?.('✅ PIXI 應用創建成功')
 
   // 記錄渲染器信息
   logRendererInfo(app.renderer, logger)
@@ -105,12 +104,11 @@ export function destroyPixiApp(
   app: Application | null,
   logger?: (message: string) => void,
 ): void {
-  const log = logger || console.log
   if (!app) return
   try {
     app.destroy()
-    log('🗑️ PixiJS 應用已銷毀')
+    logger?.('🗑️ PixiJS 應用已銷毀')
   } catch (error) {
-    log(`❌ 銷毀 PixiJS 應用時發生錯誤: ${error}`)
+    logger?.(`❌ 銷毀 PixiJS 應用時發生錯誤: ${error}`)
   }
 }
