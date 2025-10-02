@@ -4,6 +4,7 @@ import {
   createSpineAnimation,
   playSpineAnimation,
   applySpineTransform,
+  setSpineAnimationSpeed,
 } from '@/utils/pixi'
 import { createLogger } from '@/utils/pixi/logger'
 import { createFollowText } from '@/utils/pixi/textFollower'
@@ -96,7 +97,7 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
         scaleX: shouldFlip ? -scale : scale, // 負值表示左右反轉
         scaleY: scale
       })
-      
+
       app.stage.addChild(spine)
 
       const character: Character = {
@@ -227,6 +228,8 @@ export const useCharacters = (getApp: () => any, getRocketSpine: () => any) => {
         scaleX: isNpc ? -baseScale.value : baseScale.value,
         scaleY: baseScale.value
       })
+      // 跳慢一點
+      setSpineAnimationSpeed(spine, 0.5)
       
       app.stage.addChild(spine)
       

@@ -12,6 +12,7 @@ export interface LogEntry {
 export class Logger {
   private logs: Ref<LogEntry[]>
   private maxLogs: number
+  private _debug: boolean = sessionStorage.getItem('peko') === 'true' || false
   
   constructor(maxLogs: number = 50) {
     this.logs = ref<LogEntry[]>([])
@@ -22,7 +23,7 @@ export class Logger {
    * 記錄信息
    */
   info(message: string, ...args: any[]): void {
-    console.log(message, ...args)
+    if (this._debug) console.log(message, ...args)
     this.addLog(message, 'info')
   }
   
@@ -30,7 +31,7 @@ export class Logger {
    * 記錄警告
    */
   warn(message: string, ...args: any[]): void {
-    console.warn(message, ...args)
+    if (this._debug) console.warn(message, ...args)
     this.addLog(message, 'warn')
   }
   
@@ -38,7 +39,7 @@ export class Logger {
    * 記錄錯誤
    */
   error(message: string, ...args: any[]): void {
-    console.error(message, ...args)
+    if (this._debug) console.error(message, ...args)
     this.addLog(message, 'error')
   }
   
