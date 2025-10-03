@@ -37,3 +37,12 @@ export type HandlerOf<K extends keyof MittEvents> = (payload: MittEvents[K]) => 
  * @description 透過 `type HandlerOf` 進行callback function 推導
 */
 export const emitter = mitt<MittEvents>()
+
+declare global {
+  interface Window {
+    /** instance debug */
+    _emitter?: any
+  }
+}
+
+window._emitter = emitter
