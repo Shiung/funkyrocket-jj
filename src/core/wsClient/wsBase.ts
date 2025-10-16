@@ -33,7 +33,8 @@ export class wsBase {
   private timer: {
     reconnet: ReturnType<typeof setTimeout> | null
     heartbeat: ReturnType<typeof setTimeout> | null
-  } = { reconnet: null, heartbeat: null }
+    resetReconnect: ReturnType<typeof setTimeout> | null
+  } = { reconnet: null, heartbeat: null, resetReconnect: null }
 
   constructor(options: WebSocketOptions) {
     this.options = {
@@ -53,15 +54,23 @@ export class wsBase {
     this.ws.onopen = (event) => {
       debugMessage({ type: 'system', title: '😱 onopen', msg: event, isDebug: this._wsDebug })
       this.enabled = true
-      this.reconnectCount = 0
-      this.reconnectIng = false
-      this.endOfWs = false
+      // this.reconnectCount = 0
+      // this.reconnectIng = false
+      // this.endOfWs = false
+      this.timer.resetReconnect = setTimeout(() => {
+        this.reconnectCount = 0
+        this.reconnectIng = false
+        this.endOfWs = false
+      }, 10000)
     }
 
     this.ws.onmessage = (event) => {
       const resData = jsonParse(event.data)
       debugMessage({ type: 'system', title: '😱 onmessage', msg: resData, isDebug: this._wsDebug })
       this.obserableNotify(resData)
+      if (this.options.messageHandler) {
+        this.options.messageHandler(resData)
+      }
     }
 
     this.ws.onerror = (event) => {
@@ -69,7 +78,8 @@ export class wsBase {
     }
 
     this.ws.onclose = (event) => {
-      this.reconnectIng = false
+      if (this.timer.resetReconnect) clearTimeout(this.timer.resetReconnect)
+
       debugMessage({ type: 'system', title: '😱 onclose event', msg: event, isDebug: this._wsDebug })
       debugMessage({ type: 'system', title: '😱 onclose flag', msg: this.endOfWs, isDebug: this._wsDebug })
       if (event.code === 1000 || this.endOfWs) {
@@ -87,7 +97,7 @@ export class wsBase {
     const maxReAttemp = this.options.reconnectAttempts || _defaultOption.reconnectAttempts
     const reconnectTimeout = this.options.reconnectTimeout || _defaultOption.reconnectTimeout
 
-    if (this.reconnectIng || this.reconnectCount > maxReAttemp) {
+    if (this.reconnectCount >= maxReAttemp) {
       if (typeof this.options.forbiddenCb === 'function') {
         this.options.forbiddenCb()
       }
@@ -106,8 +116,8 @@ export class wsBase {
       })
     }
     debugMessage({ type: 'info', title: 'reconnect', msg: 'connect process', isDebug: this._wsDebug })
-    this.cleanup()
     this.reconnectCount++
+    this.cleanup()
     this.connect()
   }
 
@@ -121,6 +131,7 @@ export class wsBase {
 
     /** 使用者手動關閉行為 status 1000 */
     if (status === 1000) {
+      if (this.timer.resetReconnect) clearTimeout(this.timer.resetReconnect)
       this.endOfWs = true
       this.ws.close(1000, 'user close')
     } else {

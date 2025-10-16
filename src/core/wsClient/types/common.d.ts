@@ -6,7 +6,7 @@ export interface WebSocketOptions {
   heartbeatFunc?: (() => void) | null
   reconnectAttempts?: number // -1 表示無限重連
   reconnectTimeout?: number
-  messageHandler?: (e: MessageEvent<any>, event: IWsMasterEvent) => void
+  messageHandler?: (e: MessageEvent<any>) => void
   genObservekey?: ((s: any) => string | number)
   /** ws forbidden callback */
   forbiddenCb?: () => void
